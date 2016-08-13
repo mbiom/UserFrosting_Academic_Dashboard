@@ -33,11 +33,25 @@ class StudentsPerformanceController extends \UserFrosting\BaseController {
     public function pageStudentsPerformance(){
         // Access-controlled page
 
+        $ClassReference = ClassReference::queryBuilder()->get();
+
         $StudentsPerformance = StudentPerformance::queryBuilder()->get();
 
         $this->_app->render('students/students-performance.twig', [
-           "studentsperformance" => $StudentsPerformance
+           "studentsperformance" => $StudentsPerformance, 
+           "classreference" => $ClassReference
         ]);
+        
+    }
+    
+    public function getStudentsOfClass($classid) {
+        
+        $students = StudentsBio::queryBuilder()
+            ->leftJoin('uf_student_performance as stp', 'stp.student_id', '=', 'uf_students_bio.student_id')
+            ->where('reference_number', '=', $classid)
+            ->get();
+        
+        return json_encode($students);
     }
 
 }

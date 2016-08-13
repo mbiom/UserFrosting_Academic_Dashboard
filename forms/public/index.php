@@ -261,6 +261,16 @@
         return $controller->pageStudentsPerformance();
     });
 
+    $app->get('/students/get-students-of-class/:classid', function($classid) use ($app) {
+        $controller = new UF\StudentsPerformanceController($app);
+        echo $controller->getStudentsOfClass($classid);
+    });
+    
+    $app->get('/students/update-test-form-table/:term', function($term) use ($app) {
+        $controller = new UF\PostTestFormController($app);
+        echo $controller->updateTestFormTable($term);
+    });
+
     /************ ADMIN TOOLS *************/
     
     $app->get('/config/settings/?', function () use ($app) {

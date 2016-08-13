@@ -113,6 +113,9 @@ $table_configuration = new \UserFrosting\DatabaseTable($app->config('db')['db_pr
 $table_authorize_user = new \UserFrosting\DatabaseTable($app->config('db')['db_prefix'] . "authorize_user");
 $table_authorize_group = new \UserFrosting\DatabaseTable($app->config('db')['db_prefix'] . "authorize_group");
 $table_student_performance = new \UserFrosting\DatabaseTable($app->config('db')['db_prefix'] . "student_performance");
+$table_students_bio = new \UserFrosting\DatabaseTable($app->config('db')['db_prefix'] . "students_bio");
+$table_test_results = new \UserFrosting\DatabaseTable($app->config('db')['db_prefix'] . "test_results");
+$table_class_reference = new \UserFrosting\DatabaseTable($app->config('db')['db_prefix'] . "class_reference");
 
 \UserFrosting\Database::setSchemaTable("user", $table_user);
 \UserFrosting\Database::setSchemaTable("user_event", $table_user_event);
@@ -122,6 +125,9 @@ $table_student_performance = new \UserFrosting\DatabaseTable($app->config('db')[
 \UserFrosting\Database::setSchemaTable("authorize_user", $table_authorize_user);
 \UserFrosting\Database::setSchemaTable("authorize_group", $table_authorize_group);
 \UserFrosting\Database::setSchemaTable("student_performance", $table_student_performance);
+\UserFrosting\Database::setSchemaTable("students_bio", $table_students_bio);
+\UserFrosting\Database::setSchemaTable("test_results", $table_test_results);
+\UserFrosting\Database::setSchemaTable("class_reference", $table_class_reference);
 
 // Info for RememberMe table
 $app->remember_me_table = [
