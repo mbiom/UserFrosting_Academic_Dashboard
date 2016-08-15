@@ -164,4 +164,19 @@ class BaseController {
         //return base64
         return 'data:image/png;base64,'.chunk_split(base64_encode($data)); //return the base64 encoded image.
     }
+	
+	public function getLastTerm($term) {
+		$year = (int)substr($term, 0, 4);
+		$termofyear = (int)substr($term, 4, 1);
+		if ($year < 2000 || $termofyear < 1 || $termofyear > 3)
+			return "20001";
+		if ($termofyear == 1) {
+			$termofyear = 3;
+			$year = $year - 1;
+		}
+		else {
+			$termofyear = $termofyear - 1;
+		}
+		return $year.$termofyear;
+	}
 }

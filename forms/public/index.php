@@ -266,6 +266,11 @@
         echo $controller->getStudentsOfClass($classid);
     });
     
+    $app->get('/students/post-test-form/?', function () use ($app) {
+        $controller = new UF\PostTestFormController($app);
+        return $controller->pagePostTestForm();
+    });
+    
     $app->get('/students/update-test-form-table/:term', function($term) use ($app) {
         $controller = new UF\PostTestFormController($app);
         echo $controller->updateTestFormTable($term);
