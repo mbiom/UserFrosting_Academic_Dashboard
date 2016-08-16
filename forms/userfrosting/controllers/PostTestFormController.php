@@ -41,15 +41,15 @@ class PostTestFormController extends \UserFrosting\BaseController {
      */
     public function pagePostTestForm(){
         // Access-controlled page
-        $ClassReference = StudentsBio::queryBuilder()->groupBy('reference_number')->get(array('reference_number'));
-        $StudentsPerformance = StudentPerformance::queryBuilder()->get();
+        $ClassReference = StudentsBio::queryBuilder()
+            ->groupBy('reference_number')
+            ->get(array('reference_number'));
 
         $Terms = StudentsBio::queryBuilder()
             ->groupBy('term')
             ->get();
             
         $this->_app->render('students/post-test-form.twig', [
-           "studentsperformance" => $StudentsPerformance, 
            "classreference" => $ClassReference,
            "terms" => $Terms
         ]);
