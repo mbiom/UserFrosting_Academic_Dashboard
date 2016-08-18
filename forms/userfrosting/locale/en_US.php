@@ -187,6 +187,7 @@ $lang = array_merge($lang, [
 	"MENU_EXCESSIVE_ABSENCES" => "Excessive Absences",
 	"MENU_STUDENT_TRACKING" => "Student Tracking",
 	"MENU_POST_TEST_FORM" => "Post Test Form",
+    "MENU_UPDATE_TABLE" => "Update Table",
 	"MENU_STUDENT_TEST_RESULTS" => "Student Test Results",
 	"MENU_EXCESSIVE_ABSENCES_REPORT" => "Excessive Absences Report"
 ]);

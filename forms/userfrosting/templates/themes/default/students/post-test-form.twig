@@ -14,77 +14,73 @@
 
 {% block content %}
 
-<div class="row">
-    <div class="col-md-12">
-        <div class='panel panel-primary'>
-            <div class='panel-heading'>
-                <h3 class='panel-title'><i class='fa fa-users'></i> Post Test Form</h3>
-            </div>
-            
-            <div class='panel-body'>
-                <div class="well well-sm"><strong>Select Term</strong></div>
-                <table width=30%>
-                    <tr>
-                    {% for term in terms %}
-                        <td><a class="btn btn-primary term-btn" href="#">{{term.term}}</a></td>
-                    {% endfor %}
-                    </tr>
-                </table>
-                
-                <div class="well well-sm"><strong>Select Class</strong></div>
-                <table width=100% id='table-classes'>
-                    <tr>
-                        <td><a id="all_class" class="btn btn-primary class-btn" href="#">All Classes</a></td>
-                    </tr>
-                {% for class in classreference %}
-                    {% if loop.index % 10 ==1 %}
-                        <tr height = 40px>
-                    {% endif %}
-                    <td><a class="btn btn-primary class-btn" href="#">{{class.reference_number}}</a></td>
-                {% endfor %}
-                </table>
-            </div>
-            
-                <div class="table-responsive">
-                    <table id="table-tests" class="tablesorter table table-bordered table-hover table-striped tablesorter-bootstrap" width=100% data-sortlist="[[0, 0]]">
-                        <thead>
-                            <tr>
-                                <th colspan=7>&nbsp</th>
-                                <th colspan=3>Reading</th>
-                                <th colspan=3>Listening</th>
-                                <th colspan=9>&nbsp</th>
-                            </tr>
-                            <tr>
-                                <th class="sorter-metatext" data-column-name="">No <i class="fa fa-sort"></i></th>
-                                <th class="sorter-metatext" data-column-name="">Class<br> Reference <i class="fa fa-sort"></i></th>
-                                <th class="sorter-metatext" data-column-name="">Student<br> Last Name <i class="fa fa-sort"></i></th>
-                                <th class="sorter-metatext" data-column-name="">Student<br> First Name <i class="fa fa-sort"></i></th>
-                                <th class="sorter-metatext" data-column-name="">ID Number <i class="fa fa-sort"></i></th>
-                                <th class="sorter-metatext" data-column-name="">Phone<br> Number <i class="fa fa-sort"></i></th>
-                                <th class="sorter-metatext" data-column-name="">NRS Level <i class="fa fa-sort"></i></th>
-                                <th class="sorter-metatext" data-column-name="">PRE <i class="fa fa-sort"></i></th>
-                                <th class="sorter-metatext" data-column-name="">POST <i class="fa fa-sort"></i></th>
-                                <th class="sorter-metatext" data-column-name="">Reading<br> Progress <i class="fa fa-sort"></i></th>
-                                <th class="sorter-metatext" data-column-name="">PRE <i class="fa fa-sort"></i></th>
-                                <th class="sorter-metatext" data-column-name="">POST <i class="fa fa-sort"></i></th>
-                                <th class="sorter-metatext" data-column-name="">Listening<br> Progress <i class="fa fa-sort"></i></th>
-                                <th class="sorter-metatext" data-column-name="">Tracking <i class="fa fa-sort"></i></th>
-                                <th class="sorter-metatext" data-column-name="">LCP Earned <i class="fa fa-sort"></i></th>
-                                <th class="sorter-metatext" data-column-name="">LCP <i class="fa fa-sort"></i></th>
-                                <th class="sorter-metatext" data-column-name="">LCP Total <i class="fa fa-sort"></i></th>
-                                <th class="sorter-metatext" data-column-name="">Next Level <i class="fa fa-sort"></i></th>
-                                <th class="sorter-metatext" data-column-name="">Automatic<br> Promotion <i class="fa fa-sort"></i></th>
-                                <th class="sorter-metatext" data-column-name="">Admin<br> Promotion <i class="fa fa-sort"></i></th>
-                                <th class="sorter-metatext" data-column-name="">Flags <i class="fa fa-sort"></i></th>
-                                <th class="sorter-metatext" data-column-name="">Comments <i class="fa fa-sort"></i></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+
+<div class='panel panel-primary'>
+    <div class='panel-heading'>
+        <h3 class='panel-title'><i class='fa fa-users'></i> Post Test Form</h3>
+    </div>
+    
+    <div class='panel-body'>
+        <div class="well well-sm"><strong>Select Term</strong></div>
+        <table width=30%>
+            <tr>
+            {% for term in terms %}
+                <td><button class="btn-selector term-btn" href="#">{{term.term}}</button></td>
+            {% endfor %}
+            </tr>
+        </table>
+        
+        <div class="well well-sm"><strong>Select Class</strong></div>
+        <table width=100% id='table-classes'>
+            <tr>
+                <td><a id="all_class" class="btn-selector class-btn" href="#">All Classes</button></td>
+            </tr>
+        {% for class in classreference %}
+            {% if loop.index % 10 ==1 %}
+                <tr>
+            {% endif %}
+            <td><button class="btn-selector class-btn" href="#">{{class.reference_number}}</button></td>
+        {% endfor %}
+        </table>
+    </div>
+    
+    <div class="table-responsive">
+        <table id="table-tests" class="tablesorter table table-bordered table-hover table-striped tablesorter-bootstrap" width='100%'>
+            <thead>
+                <tr>
+                    <th colspan=7>&nbsp</th>
+                    <th colspan=3>Reading</th>
+                    <th colspan=3>Listening</th>
+                    <th colspan=9>&nbsp</th>
+                </tr>
+                <tr>
+                    <th data-column-name="student-no">No </th>
+                    <th data-column-name="column-1">Class<br> Reference </th>
+                    <th data-column-name="column-2">Student<br> Last Name </th>
+                    <th data-column-name="column-3">Student<br> First Name </th>
+                    <th data-column-name="column-4">ID Number </th>
+                    <th data-column-name="column-5">Phone Number </th>
+                    <th data-column-name="column-6">NRS Level </th>
+                    <th data-column-name="column-7">PRE </th>
+                    <th data-column-name="column-8">POST </th>
+                    <th data-column-name="column-9">Reading<br> Progress </th>
+                    <th data-column-name="column-10">PRE </th>
+                    <th data-column-name="column-11">POST </th>
+                    <th data-column-name="column-12">Listening<br> Progress </th>
+                    <th data-column-name="column-13">Tracking </th>
+                    <th data-column-name="column-14">LCP Earned </th>
+                    <th data-column-name="column-15">LCP </th>
+                    <th data-column-name="column-16">LCP Total </th>
+                    <th data-column-name="column-17">Next Level </th>
+                    <th data-column-name="column-18">Automatic<br> Promotion </th>
+                    <th data-column-name="column-19">Admin<br> Promotion </th>
+                    <th data-column-name="column-20">Flags </th>
+                    <th data-column-name="column-21">Comments </th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}
@@ -95,6 +91,19 @@
                 //$('table#table-groups tbody').html()
                 var test_results;
                 
+                $('table#table-tests').on('click', '.auth-btn', function() {
+                    
+                    var button = $(this);
+                    var term_Id = button.attr('id');
+                        
+                    $.ajax('/students/authorize-promotion/' + term_Id, {
+                        success: function(data) {
+                            button.html = "Authorized";
+                            button.attr('class', 'btn-authorized');
+                        }
+                    });
+                });
+                
                 $('.term-btn').on('click', function(){
                     var $this = $(this);
                     
@@ -102,7 +111,7 @@
                     $this.css("background-color","green");
                     
                     var termId = $this.html();
-                    $.ajax('/students/update-test-form-table/' + termId, {
+                    $.ajax('/students/get-post-test-form/' + termId, {
                         success: function(data) {
                             test_results = JSON.parse(data);
                             $('.class-btn').first().click();
@@ -126,41 +135,50 @@
                 function loadResutlsOfClass(classId) {
                     var tableHtml = '';
                     var indexArr = 0;
-                    for (var student_id in test_results) {
-                        if (test_results[student_id].classRef != classId && classId != "All Classes")
+                    for (var key in test_results) {
+                        if (test_results[key].reference_number != classId && classId != "All Classes")
                             continue;
                         
                         tableHtml += '<tr>';
                         tableHtml += '<td>' + (++indexArr) + '</td>';
-                        tableHtml += '<td>' + test_results[student_id].classRef + '</td>';
-                        tableHtml += '<td>' + test_results[student_id].lastName + '</td>';
-                        tableHtml += '<td>' + test_results[student_id].firstName + '</td>';
-                        tableHtml += '<td>' + student_id + '</td>';
-                        tableHtml += '<td>' + test_results[student_id].phone + '</td>';
-                        tableHtml += '<td>' + test_results[student_id].NRS + '</td>';
-                        tableHtml += '<td>' + test_results[student_id].preR + '</td>';
-                        tableHtml += '<td>' + test_results[student_id].postR + '</td>';
-                        tableHtml += '<td>' + test_results[student_id].progR + '</td>';
-                        tableHtml += '<td>' + test_results[student_id].preL + '</td>';
-                        tableHtml += '<td>' + test_results[student_id].postL + '</td>';
-                        tableHtml += '<td>' + test_results[student_id].progL + '</td>';
-                        tableHtml += '<td>' + test_results[student_id].tracking + '</td>';
-                        tableHtml += '<td>' + test_results[student_id].LCPEarned + '</td>';
-                        tableHtml += '<td>' + test_results[student_id].LCP + '</td>';
-                        tableHtml += '<td>' + test_results[student_id].LCPTotal + '</td>';
-                        tableHtml += '<td>' + test_results[student_id].nextLevel + '</td>';
-                        if (test_results[student_id].autoProm > 0)
-                            tableHtml += '<td>' + '<input type=checkbox>' + '</td>';
-                        else
-                            tableHtml += '<td></td>';
-                        tableHtml += '<td>' + test_results[student_id].adminProm + '</td>';
-                        tableHtml += '<td>' + test_results[student_id].flags + '</td>';
-                        tableHtml += '<td>' + test_results[student_id].comments + '</td>';
+                        tableHtml += '<td>' + test_results[key].reference_number + '</td>';
+                        tableHtml += '<td>' + test_results[key].last_name + '</td>';
+                        tableHtml += '<td>' + test_results[key].first_name + '</td>';
+                        tableHtml += '<td>' + test_results[key].student_id + '</td>';
+                        tableHtml += '<td>' + test_results[key].telephone + '</td>';
+                        tableHtml += '<td>' + test_results[key].nrs_level + '</td>';
+                        tableHtml += '<td>' + fixZ(test_results[key].pre_reading) + '</td>';
+                        tableHtml += '<td>' + fixZ(test_results[key].post_reading) + '</td>';
+                        tableHtml += '<td>' + test_results[key].prog_reading + '</td>';
+                        tableHtml += '<td>' + fixZ(test_results[key].pre_listening) + '</td>';
+                        tableHtml += '<td>' + fixZ(test_results[key].post_listening) + '</td>';
+                        tableHtml += '<td>' + test_results[key].prog_listening + '</td>';
+                        tableHtml += '<td>' + fixZ(test_results[key].tracking) + '</td>';
+                        tableHtml += '<td>' + test_results[key].lcp_earned + '</td>';
+                        tableHtml += '<td>' + test_results[key].lcp + '</td>';
+                        tableHtml += '<td>' + test_results[key].lcp_total + '</td>';
+                        tableHtml += '<td>' + test_results[key].next_level + '</td>';
+                        tableHtml += '<td>' + (test_results[key].auto_prom=="C" ? '<input type=checkbox checked>' : "&nbsp") + '</td>';
+                        tableHtml += "<td>" +
+                                        (test_results[key].admin_prom=="C" ?
+                                         "<input type=checkbox checked disabled><button class='btn-authorize auth-btn' id=" + (test_results[key].term) + "_" + test_results[key].student_id + ">Authorize</button>" :
+                                        (test_results[key].admin_prom=="A" ?
+                                           "<input type=checkbox checked disabled><button class='btn-authorized'>Authorized" :
+                                         "&nbsp"))
+                                        + '</td>';
+                        tableHtml += '<td>' + test_results[key].flags + '</td>';
+                        tableHtml += '<td>' + test_results[key].comments + '</td>';
                         tableHtml += '</tr>';
                     }
                     
                     $('table#table-tests tbody').html(tableHtml);
+                    //ufTable('table-tests');
                 }
+                
+                function fixZ(num) {
+                    return num == 0 ? '' : num;
+                }
+                
             });
         </script>
 {% endblock %}

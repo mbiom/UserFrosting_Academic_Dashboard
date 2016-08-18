@@ -6563,4 +6563,57 @@ button.close {
     display: none !important;
   }
 }
+
+
+.btn-selector {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    width: 100px;
+    height: 30px;
+    text-align: center;
+    line-height: 30px;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    margin: 10px 4px;
+}
+
+.btn-authorize {
+  background: #3498db;
+  background-image: -webkit-linear-gradient(top, #3498db, #2980b9);
+  background-image: -moz-linear-gradient(top, #3498db, #2980b9);
+  background-image: -ms-linear-gradient(top, #3498db, #2980b9);
+  background-image: -o-linear-gradient(top, #3498db, #2980b9);
+  background-image: linear-gradient(to bottom, #3498db, #2980b9);
+  -webkit-border-radius: 3;
+  -moz-border-radius: 3;
+  border-radius: 3px;
+  font-family: Arial;
+  color: #ffffff;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.btn-authorize:hover {
+  background: #3cb0fd;
+  background-image: -webkit-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: -moz-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: -ms-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: -o-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
+  text-decoration: none;
+}
+
+.btn-authorized {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    height: 20px;
+    text-align: center;
+    line-height: 20px;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+}
 /*# sourceMappingURL=bootstrap.css.map */

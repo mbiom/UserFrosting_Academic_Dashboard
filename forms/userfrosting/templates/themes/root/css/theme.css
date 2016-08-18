@@ -188,7 +188,7 @@ body {
   transition: all .5s;
 }
 .btn-primary.btn-outline {
-  color: #428bca;
+  color: red;
 }
 .btn-success.btn-outline {
   color: #5cb85c;

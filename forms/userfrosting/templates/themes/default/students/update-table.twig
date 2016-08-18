@@ -1,0 +1,46 @@
+{% extends "layouts/layout-dashboard.twig" %}
+{% set page_group = "students" %}
+
+{# Set page properties (page.*) here. #}
+{% block page %}
+    {# By putting this in a special block, we ensure that it will be set AFTER the default values are set in the parent template, 
+    but BEFORE the page itself is rendered. #}    
+    {% set page = page | merge({
+        "title"       : "Update Table",
+        "description" : ""
+    }) %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class='panel panel-primary'>
+            <div class='panel-body'>
+                <a class="btn btn-primary update-btn" href="#">Update Table</a>
+                <p class="panel-alert" style="color: red; margin-top: 30px">
+                    Click button to start update.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block page_scripts %}
+        <script>            
+            $(document).ready(function() {
+                $('.update-btn').on('click', function(){
+                    $('.panel-alert').html('Updating now... Please wait a few minutes.');
+                    $.ajax('/students/update-test-form-table', {
+                        success: function(data) {
+                            updateResult = JSON.parse(data);
+                            console.log(updateResult);
+                            $('.panel-alert').html('Successfully updated.');
+                        }
+                    });
+                });
+            });
+        </script>
+{% endblock %}
+

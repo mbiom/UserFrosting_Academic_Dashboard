@@ -271,9 +271,24 @@
         return $controller->pagePostTestForm();
     });
     
-    $app->get('/students/update-test-form-table/:term', function($term) use ($app) {
+    $app->get('/students/get-post-test-form/:term', function($term) use ($app) {
         $controller = new UF\PostTestFormController($app);
-        echo $controller->updateTestFormTable($term);
+        echo $controller->getTestFormOfTerm($term);
+    });
+    
+    $app->get('/students/authorize-promotion/:term_id', function($term_id) use ($app) {
+        $controller = new UF\PostTestFormController($app);
+        echo $controller->authoizePromotion($term_id);
+    });
+    
+    $app->get('/students/update-table/?', function () use ($app) {
+        $controller = new UF\UpdateTableController($app);
+        return $controller->pageUpdateTable();
+    });
+    
+    $app->get('/students/update-test-form-table/?', function() use ($app) {
+        $controller = new UF\UpdateTableController($app);
+        echo $controller->updateTestFormTable();
     });
 
     /************ ADMIN TOOLS *************/
