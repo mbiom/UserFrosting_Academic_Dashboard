@@ -290,7 +290,21 @@
         $controller = new UF\UpdateTableController($app);
         echo $controller->updateTestFormTable();
     });
+    
+    $app->get('/students/excessive-absences/?', function() use ($app) {
+        $controller = new UF\ExcessiveAbsencesController($app);
+        echo $controller->pageExcessiveAbsences();
+    });
 
+    $app->get('/students/get-excessive-absences/:classRef', function($classRef) use ($app) {
+        $controller = new UF\ExcessiveAbsencesController($app);
+        echo $controller->getExcessiveAbsences($classRef);
+    });
+    
+    $app->get('/students/set-excessive-absences/:absdata', function($absdata) use ($app) {
+        $controller = new UF\ExcessiveAbsencesController($app);
+        echo $controller->setExcessiveAbsences($absdata);
+    });
     /************ ADMIN TOOLS *************/
     
     $app->get('/config/settings/?', function () use ($app) {

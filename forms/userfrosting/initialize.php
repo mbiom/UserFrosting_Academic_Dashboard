@@ -117,6 +117,7 @@ $table_students_bio = new \UserFrosting\DatabaseTable($app->config('db')['db_pre
 $table_test_results = new \UserFrosting\DatabaseTable($app->config('db')['db_prefix'] . "test_results");
 $table_class_reference = new \UserFrosting\DatabaseTable($app->config('db')['db_prefix'] . "class_reference");
 $table_post_test_form = new \UserFrosting\DatabaseTable($app->config('db')['db_prefix'] . "post_test_form");
+$table_excessive_absences = new \UserFrosting\DatabaseTable($app->config('db')['db_prefix'] . "excessive_absences");
 
 \UserFrosting\Database::setSchemaTable("user", $table_user);
 \UserFrosting\Database::setSchemaTable("user_event", $table_user_event);
@@ -130,6 +131,7 @@ $table_post_test_form = new \UserFrosting\DatabaseTable($app->config('db')['db_p
 \UserFrosting\Database::setSchemaTable("test_results", $table_test_results);
 \UserFrosting\Database::setSchemaTable("class_reference", $table_class_reference);
 \UserFrosting\Database::setSchemaTable("post_test_form", $table_post_test_form);
+\UserFrosting\Database::setSchemaTable("excessive_absences", $table_excessive_absences);
 
 // Info for RememberMe table
 $app->remember_me_table = [

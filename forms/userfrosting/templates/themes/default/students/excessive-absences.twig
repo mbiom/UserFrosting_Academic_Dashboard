@@ -1,0 +1,163 @@
+{% extends "layouts/layout-dashboard.twig" %}
+{% set page_group = "students" %}
+
+{# Set page properties (page.*) here. #}
+{% block page %}
+    {# By putting this in a special block, we ensure that it will be set AFTER the default values are set in the parent template, 
+    but BEFORE the page itself is rendered. #}    
+    {% set page = page | merge({
+        "title"       : "Excessive Absences",
+        "description" : ""
+    }) %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content %}
+
+
+<div class='panel panel-primary'>
+    <div class='panel-heading'>
+        <h3 class='panel-title'><i class='fa fa-users'></i> Post Test Form</h3>
+    </div>
+    
+    <div class='panel-body'>
+        <div class="well well-sm"><strong>Select Class</strong></div>
+        <table width=100% id='table-classes'>
+        {% for class in classreference %}
+            {% if loop.index % 10 == 1 %}
+                <tr>
+            {% endif %}
+            <td><button class="btn-selector class-btn" href="#">{{class.reference_number}}</button></td>
+            {% if loop.index % 10 == 0 %}
+                </tr>
+            {% endif %}
+        {% endfor %}
+        </table>
+    </div>
+    
+    <div class="table-responsive">
+        <table id="table-absences" class="tablesorter table table-bordered table-hover table-striped tablesorter-bootstrap">
+            <thead>
+                <tr>
+                    <th data-column-name="student-no">No </th>
+                    <th data-column-name="column-1">Check </th>
+                    <th data-column-name="column-2">Student Name </th>
+                    <th data-column-name="column-3">#Absences </th>
+                    <th width='50%'> </th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <div class="row">
+        <div class="col-md-6 " style='text-align: center'>
+            <button type="button" class="btn btn-submit" style="margin-top: 30px; margin-bottom: 30px">Submit</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block page_scripts %}
+        <script>            
+            $(document).ready(function() {
+                //console.log(terms);
+                //$('table#table-groups tbody').html()
+                var student_absences;
+                
+                $('.class-btn').on('click', function() {
+                    var $this = $(this);
+                    
+                    $('.class-btn').css("background-color","#337ab7");
+                    $this.css("background-color","green");
+                    
+                    var classRef = $this.html();
+                    $.ajax('/students/get-excessive-absences/' + classRef, {
+                        success: function(data) {
+                            student_absences = JSON.parse(data);
+                            console.log(student_absences);
+                            loadDataOfClass();
+                        }
+                    });
+                    
+                    return false;
+                });
+                
+                function loadDataOfClass() {
+                    var tableHtml = '';
+                    var indexArr = 0;
+                    for (var key in student_absences)
+                    {
+                        tableHtml += '<tr>';
+                        tableHtml += '<td>' + (++indexArr) + '</td>';
+                        tableHtml += '<td><input type=checkbox class=absence-check id=check_' + student_absences[key].term +"_" + student_absences[key].student_id + (!student_absences[key].checked ? ">" : " checked>") + '</td>';
+                        tableHtml += '<td>' + student_absences[key].first_name + " " + student_absences[key].last_name + '</td>';
+                        tableHtml += '<td><input type=text class=absence-num id=text_' + student_absences[key].term +"_" + student_absences[key].student_id + ' value=' + (!student_absences[key].absences ? "" : student_absences[key].absences) + '></td>';
+                        tableHtml += '<td></td>';
+                        tableHtml += '</tr>';
+                    }
+                    
+                    $('table#table-absences tbody').html(tableHtml);
+                    //ufTable('table-tests');
+                }
+                
+                $('.btn-submit').on('click', function() {
+                    if (student_absences.length == 0)   return;
+                    
+                    var checked_students = new Array();
+                    for (var key in student_absences)
+                    {
+                        var abs_check = $('#check_'+student_absences[key].term +"_" + student_absences[key].student_id);
+                        var abs_num_text = $('#text_'+student_absences[key].term +"_" + student_absences[key].student_id);
+                        
+                        if (abs_check.is(':checked')){
+                            if (!isNormalInteger(abs_num_text.val())) {
+                                alert ("Please input absences number correctly.");
+                                return;
+                            }
+                            else if (parseInt(abs_num_text.val() == 0)) {
+                                alert ("Please input absences number correctly.");
+                                return;
+                            }
+                        }
+                        
+                        checked_students.push(new Array(student_absences[key].term,
+                                                        student_absences[key].student_id,
+                                                        abs_check.is(':checked') ? 1 : 0,
+                                                        abs_num_text.val()=="" ? "0" : abs_num_text.val()));
+                    }
+                    
+                    $.ajax('/students/set-excessive-absences/' + arrayToString(checked_students) , {
+                        success: function(data) {
+                            alert ("Successfully submitted.");
+                        }
+                    });
+                    
+                    return false;
+                });
+                
+                function arrayToString(arr) {
+                    var str = "";
+                    for (var key in arr)
+                    {
+                        var str1 = "";
+                        for (var key1 in arr[key])
+                        {
+                            str1 += arr[key][key1] + "_";
+                        }
+                        if (str1.length > 0){
+                            str1 = str1.substr(0, str1.length-1);
+                            str += str1 + "-";
+                        }
+                    }
+                    if (str.length > 0){
+                        str = str.substr(0, str.length-1);
+                    }
+                    return str;
+                }
+                
+                function isNormalInteger(str) {
+                    return /^\+?(0|[1-9]\d*)$/.test(str);
+                }
+            });
+        </script>
+{% endblock %}
