@@ -305,6 +305,16 @@
         $controller = new UF\ExcessiveAbsencesController($app);
         echo $controller->setExcessiveAbsences($absdata);
     });
+    
+    $app->get('/students/student-tracking/?', function() use ($app) {
+        $controller = new UF\StudentTrackingController($app);
+        echo $controller->pageStudentTracking();
+    });
+    
+    $app->get('/students/student-tracking/:student_id', function($student_id) use ($app) {
+        $controller = new UF\StudentTrackingController($app);
+        echo $controller->getStudentTracking($student_id);
+    });
     /************ ADMIN TOOLS *************/
     
     $app->get('/config/settings/?', function () use ($app) {

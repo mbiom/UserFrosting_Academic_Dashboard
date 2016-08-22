@@ -231,7 +231,7 @@ class UpdateTableController extends \UserFrosting\BaseController {
         }
         
         //format array result
-        $check_fields = array('NRS', 'preR', 'postR', 'progR', 'preL', 'postL', 'progL', 'tracking', 'LCPEarned', 'LCP', 'LCPTotal', 'nextLevel', 'autoProm', 'adminProm', 'flags', 'comments');
+        $check_fields = array('NRS', 'preR', 'postR', 'progR', 'preL', 'postL', 'progL', 'tracking', 'LCPEarned', 'LCP', 'LCPTotal', 'nextLevel', 'autoProm', 'adminProm', 'comments');
         foreach ($arr_test_results as $key => $test_result) {
             foreach ($check_fields as $fieldname) {
                 if (!array_key_exists($fieldname, $test_result)){
@@ -278,7 +278,6 @@ class UpdateTableController extends \UserFrosting\BaseController {
                 'next_level'  => $test_result['nextLevel'],
                 'auto_prom'  => $test_result['autoProm'],
                 'admin_prom'  => $test_result['adminProm'],
-                'flags'  => $test_result['flags'],
                 'comments'  => $test_result['comments']
                 );
             array_push($insertData, $row);
