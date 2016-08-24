@@ -22,25 +22,25 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            <i class="fa fa-fw"></i>Select student
+            Select student
         </div>
         <!-- /.panel-heading -->
         <div class="panel-body">
-            <input type="text" class="input-sel" placeholder="Enter Student ID"></input>
+            <input type="text" class="input-sel" placeholder="Enter Student ID" value=92714395></input>
         </div>
         <!-- /.panel-body -->
     </div>
     
     <div class="panel panel-default">
-        <div class="panel-heading">
-            <i class="fa fa-bar-chart-o fa-fw"></i>Alzate, Jose
+        <div class="panel-heading" id="std-name">
+            Name
         </div>
         <!-- /.panel-heading -->
         <div class="panel-body">
             <div class="row">
                 <div class="col-lg-4">
                     <div class="table-responsive">
-                        <table class="table table-bordered table-hover table-striped">
+                        <table class="tablesorter table table-bordered table-hover table-striped tablesorter-bootstrap tbl-tracking">
                             <thead>
                                 <tr>
                                     <th>Form</th>
@@ -49,26 +49,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>084L</td>
-                                    <td>12/09/2015</td>
-                                    <td>213</td>
-                                </tr>
-                                <tr>
-                                    <td>084R</td>
-                                    <td>12/09/2015</td>
-                                    <td>203</td>
-                                </tr>
-                                <tr>
-                                    <td>083R</td>
-                                    <td>7/01/2015</td>
-                                    <td>206</td>
-                                </tr>
-                                <tr>
-                                    <td>083L</td>
-                                    <td>7/01/2015</td>
-                                    <td>204</td>
-                                </tr>
+                                <tr><td></td><td></td><td></td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -78,22 +59,6 @@
                 <div class="col-lg-8">
                     <div id="tracked-info">
                         <hr>
-                        <b>View in case of new student.</b><br><br>
-                        <table class="tbl-tracked-info">
-                            <tr><td>Alzate is a new student</td></tr>
-                            <tr><td>Last taken date: 4/1/2016(130 days ago)</td></tr>
-                            <tr><td></td></tr>
-                            <tr><td></td></tr>
-                        </table>
-                        <hr>
-                        <b>View in case of old student.</b><br><br>
-                        <table class="tbl-tracked-info">
-                            <tr><td>Tracking: Reading</td></tr>
-                            <tr><td>Last taken date: 8/1/2016(20 days ago)</td></tr>
-                            <tr><td>Current level: Hign Begining</td></tr>
-                            <tr><td>Next level: Low Intermediate</td></tr>
-                            <tr><td>Administrator Allen David authorized promotion.</td></tr>
-                        </table>
                     </div>
                 </div>
                 <!-- /.col-lg-8 (nested) -->
@@ -108,6 +73,75 @@
     <script>            
         $(document).ready(function() {
             
+            var student_tracking_info;
+            $(".input-sel").keypress(function(e) {
+                if(e.which == 13) {
+                    if ($(this).val() == "") {
+                        alert ("Please input student identifier.");
+                        return;
+                    }
+                    $.ajax('/students/get-student-tracking/' + $(this).val(), {
+                        success: function(data) {
+                            student_tracking_info = JSON.parse(data);
+                            if (student_tracking_info === null || student_tracking_info.length == 0){
+                                alert ("Can not find the student.");
+                                return;
+                            }
+                            console.log(student_tracking_info);
+                            loadDataOfTests();
+                        }
+                    });
+                }
+            });
+            
+            var level_names = {"FO": "Foundations",
+                    "LB": "Low Begining",
+                    "HB": "High Begining",
+                    "LI": "Low Intermediate",
+                    "HI": "High Intermediate",
+                    "ADV": "Advanced",
+                    "CCR": "Collage and Career Readiness", };
+            
+            function loadDataOfTests() {
+                var tableHtml = '';
+                var test_results = student_tracking_info['test_results'];
+                $('#std-name').html(test_results[0]['student_name']);
+                for (var key in test_results)
+                {
+                    tableHtml += '<tr>';
+                    tableHtml += '<td>' + test_results[key]['form'] + '</td>';
+                    tableHtml += '<td>' + test_results[key]['test_date'] + '</td>';
+                    tableHtml += '<td>' + test_results[key]['score'] + '</td>';
+                    tableHtml += '</tr>';
+                }
+                $('table.tbl-tracking tbody').html(tableHtml);
+                
+                var today = new Date;
+                var last_taken = new Date(student_tracking_info['last_taken']);
+                var datediff = parseInt((today.getTime()-last_taken.getTime())/(24*3600*1000));
+                
+                tableHtml = '<font size=3>';
+                if (datediff > 120) { // for returning student
+                    tableHtml += "<p><b>" + test_results[0]['student_name']
+                            + "</b> is a <font color=red><b>Returning Student</b></font>" + "</p>";
+                    tableHtml += "<p>" + "Student has to take a new <b>PRE TEST</b>" + "</p>";
+                    tableHtml += "<p>" + "Last taken test date: <b>"
+                            + student_tracking_info['last_taken'] + "</b> (<b>" + datediff + "</b> days ago)" + "</b></p>";
+                }
+                else {
+                    tableHtml += "<p><b>" + test_results[0]['student_name'] + "</b></p><hr>";
+                    tableHtml += "<p>" + " Next Level: <b>" + level_names[student_tracking_info['next_level']] + "</b></p>";
+                    tableHtml += "<p>" + "Last taken test date: <b>" + student_tracking_info['last_taken'] + "</b> (<b>" + datediff + "</b> days ago)" + "</p>";
+                    tableHtml += "<p>" + "Current Level: <b>" + level_names[student_tracking_info['nrs_level']] + "</b></p>";
+                    tableHtml += "<p>" + "Tracking: <b>" + (student_tracking_info['tracking'] == 10 ? "Reading" : "Listening") + "</b></p>";
+                    tableHtml += "<p>" + (student_tracking_info['admin_prom'] == 'A' ? "Administrator authorized promotion" : "") + "</p>";
+                    tableHtml += "<p>" + (student_tracking_info['auto_prom'] == 'C' ? "AUTOMATIC PROMOTION" : "") + "</p>";
+                    tableHtml += "<p>" + student_tracking_info['comments'] + "</p>";
+                }
+                
+                tableHtml += "</font>";
+                $('#tracked-info').html(tableHtml);
+            }
         });
     </script>
 {% endblock %}

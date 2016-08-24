@@ -179,4 +179,15 @@ class BaseController {
 		}
 		return $year.$termofyear;
 	}
+	
+	
+    public $LEVEL_RANGES = array(
+                                 array("FO", 153, 180, 169, 180, "A"),
+                                 array("LB", 181, 190, 181, 189, "B"),
+                                 array("HB", 191, 200, 190, 199, "C"),
+                                 array("LI", 201, 210, 200, 209, "D"),
+                                 array("HI", 211, 220, 210, 218, "E"),
+                                 array("ADV", 221, 235, 219, 227, "F"),
+                                 array("CCR", 236, 1000, 228, 1000, ""),);
+	public $LASTTERM = "20153";
 }

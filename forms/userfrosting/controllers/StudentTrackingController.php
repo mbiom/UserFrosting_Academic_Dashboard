@@ -33,38 +33,44 @@ class StudentTrackingController extends \UserFrosting\BaseController {
      */
     public function pageStudentTracking(){
         // Access-controlled page
-        $ClassReference = StudentsBio::queryBuilder()
-            ->groupBy('reference_number')
-            ->get(array('reference_number'));
+        $students = StudentsBio::queryBuilder()
+            ->groupBy('student_id')
+            ->get(array('student_id'));
 
-        $Terms = StudentsBio::queryBuilder()
-            ->groupBy('term')
-            ->get();
-            
         $this->_app->render('students/student-tracking.twig', [
-           "classreference" => $ClassReference,
-           "terms" => $Terms
+           "students" => $students
         ]);
     }
     
     public function getStudentTracking($student_id) {
-        $students = array();
         
-        $term = StudentsBio::queryBuilder()
-            ->groupBy('term')
-            ->orderBy('term', 'desc')
-            ->first();
+        $student_tracking = array(); // returning value
         
-        if (is_null($term))
-            return json_encode($students);
+        $test_results = TestResults::queryBuilder()
+            ->where('student_id', $student_id)
+            ->orderBy('test_date', 'desc')
+            ->get();
+        $last_taken = "";
+        if (count($test_results) != 0) {
+            $last_taken = $test_results[0]['test_date'];
+        }
+        else {
+            return json_encode($student_tracking);
+        }
         
-        $term = $term['term'];
+        $trackings = PostTestForm::queryBuilder()
+            ->where('student_id', $student_id)
+            ->where('term', '=', $this->LASTTERM)
+            ->get();
+            
+        if (count($trackings) != 0) {
+            $student_tracking = $trackings[0];
+        }
         
-        $students = StudentsBio::queryBuilder()
-            ->leftJoin('uf_excessive_absences as ea', 'ea.student_id', '=', 'uf_students_bio.student_id', 'and', 'ea.term', '=', 'uf_students_bio.term')
-            ->where('reference_number', '=', $classRef)
-            ->get(array('uf_students_bio.*', 'ea.absences', 'ea.checked'));
+        $student_tracking['last_taken'] = $last_taken;
+        $student_tracking['test_results'] = $test_results;
         
-        return json_encode($students);
+        //var_dump($student_tracking);
+        return json_encode($student_tracking);
     }
 }

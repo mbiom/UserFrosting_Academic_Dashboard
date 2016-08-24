@@ -30,7 +30,8 @@
             </tr>
         </table>
         
-        <div class="well well-sm"><strong>Select Class</strong></div>
+        <div class="well well-sm"><strong>Select Class</strong>
+        </div>
         <table width=100% id='table-classes'>
             <tr>
                 <td><a id="all_class" class="btn-selector class-btn" href="#">All Classes</button></td>
@@ -55,7 +56,7 @@
                 </tr>
                 <tr>
                     <th data-column-name="student-no">No </th>
-                    <th data-column-name="column-1">Class<br> Reference </th>
+                    <th data-column-name="column-1">Class Ref</th>
                     <th data-column-name="column-2">Student<br> Last Name </th>
                     <th data-column-name="column-3">Student<br> First Name </th>
                     <th data-column-name="column-4">ID Number </th>
@@ -74,7 +75,6 @@
                     <th data-column-name="column-17">Next Level </th>
                     <th data-column-name="column-18">Automatic<br> Promotion </th>
                     <th data-column-name="column-19">Admin<br> Promotion </th>
-                    <th data-column-name="column-20">Flags </th>
                     <th data-column-name="column-21">Comments </th>
                 </tr>
             </thead>
@@ -142,8 +142,8 @@
                         tableHtml += '<tr>';
                         tableHtml += '<td>' + (++indexArr) + '</td>';
                         tableHtml += '<td>' + test_results[key].reference_number + '</td>';
-                        tableHtml += '<td>' + test_results[key].last_name + '</td>';
-                        tableHtml += '<td>' + test_results[key].first_name + '</td>';
+                        tableHtml += '<td>' + capitalizeFirstLetter(test_results[key].last_name) + '</td>';
+                        tableHtml += '<td>' + capitalizeFirstLetter(test_results[key].first_name) + '</td>';
                         tableHtml += '<td>' + test_results[key].student_id + '</td>';
                         tableHtml += '<td>' + test_results[key].telephone + '</td>';
                         tableHtml += '<td>' + test_results[key].nrs_level + '</td>';
@@ -166,7 +166,6 @@
                                            "<input type=checkbox checked disabled><button class='btn-authorized'>Authorized" :
                                          "&nbsp"))
                                         + '</td>';
-                        tableHtml += '<td>' + test_results[key].flags + '</td>';
                         tableHtml += '<td>' + test_results[key].comments + '</td>';
                         tableHtml += '</tr>';
                     }
@@ -179,6 +178,10 @@
                     return num == 0 ? '' : num;
                 }
                 
+                function capitalizeFirstLetter(string) {
+                    string = string.toLowerCase();
+                    return string.charAt(0).toUpperCase() + string.slice(1);
+                }
             });
         </script>
 {% endblock %}

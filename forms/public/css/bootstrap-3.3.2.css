@@ -6616,4 +6616,14 @@ button.close {
     display: inline-block;
     font-size: 14px;
 }
+
+.input-sel { 
+    border: 1px groove #436F9A;
+    background-color: #FFD0D0;
+    outline:0; 
+    height:35px; 
+    width: 275px;
+    text-align: center;
+    font-size: 16px;
+}
 /*# sourceMappingURL=bootstrap.css.map */

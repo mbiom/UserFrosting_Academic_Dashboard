@@ -18,19 +18,12 @@ class UpdateTableController extends \UserFrosting\BaseController {
      *
      * @param UserFrosting $app The main UserFrosting app.
      */
-    public $LEVEL_RANGES = array(
-                                 array("FO", 153, 180, 169, 180, "A"),
-                                 array("LB", 181, 190, 181, 189, "B"),
-                                 array("HB", 191, 200, 190, 199, "C"),
-                                 array("LI", 201, 210, 200, 209, "D"),
-                                 array("HI", 211, 220, 210, 218, "E"),
-                                 array("ADV", 221, 235, 219, 227, "F"),
-                                 array("CCR", 236, 1000, 228, 1000, ""),);
     
     public function __construct($app){
         $this->_app = $app;
     }
-
+    
+    public $STUDENTS_TRACKING;
     /**
      * Renders the PostTestForm listing page.
      *
@@ -59,20 +52,75 @@ class UpdateTableController extends \UserFrosting\BaseController {
     }
     
     public function updateTestFormTable() {
-        
+        //get trackings from tracking table
+        $this->STUDENTS_TRACKING = array();
+        $trackings = StudentsTracking::queryBuilder()
+            ->get();
+            
+        foreach ($trackings as $tracking) {
+            $this->STUDENTS_TRACKING[$tracking['student_id']] = $tracking['tracking'];
+        }
+        //update table where last term
         $terms = TestResults::queryBuilder()
             ->where('term', '<>', '')
             ->groupBy('term')
+            ->orderBy('term', 'desc')
             ->get(array('term'));
-            
-        foreach($terms as $term) {
-            $this->updateTable($term['term']);
-        }
         
+        $this->updatePostTestFormTable($terms[0]['term']);
+        //$this->updateTrackingTable();
         return json_encode("Ok");
     }
     
-    public function updateTable($term) {
+    public function updateTrackingTable() {
+        StudentsTracking::queryBuilder()
+            ->delete();
+            
+        $arr_trackings = array();
+        $students = StudentsBio::queryBuilder()
+            ->where('term', '=', '20152')
+            ->groupBy('student_id')
+            ->get(array('student_id'));
+            
+        foreach ($students as $student) {
+            $arr_trackings[$student['student_id']] = 10;
+        }
+        
+        $students = StudentsBio::queryBuilder()
+            ->where('term', '=', '20153')
+            ->groupBy('student_id')
+            ->get(array('student_id'));
+        
+        foreach ($students as $student) {
+            if (!array_key_exists($student['student_id'], $arr_trackings)) {
+                $missed_tracking = PostTestForm::queryBuilder()
+                    ->where('term', '=', '20153')
+                    ->where('student_id', '=', $student['student_id'])
+                    ->get(array('student_id', 'tracking'));
+                if(count($missed_tracking) != 0 && $missed_tracking[0]['tracking'] != 0) {
+                    $arr_trackings[$student['student_id']]  = $missed_tracking[0]['tracking'];
+                }
+            }
+        }
+        
+        $insertData = array();
+        foreach ($arr_trackings as $key=>$value) {
+            $row = array(
+                'student_id' => $key,
+                'tracking' => $value
+            );
+            array_push($insertData, $row);
+        }
+        
+        StudentsTracking::queryBuilder()
+            ->insert($insertData);
+            
+        var_dump($insertData);
+         
+        return "";
+    }
+    
+    public function updatePostTestFormTable($term) {
         
         $students = StudentsBio::queryBuilder()
             ->where('term', '=', $term)
@@ -151,9 +199,11 @@ class UpdateTableController extends \UserFrosting\BaseController {
                 $arr_test_results[$student_id]['comments'] = "Check testing";
             }
             else {
-                $trackingLevel = $this->getTracking($test_result['preR'], $test_result['preL']);
-                $arr_test_results[$student_id]['tracking'] = $trackingLevel[0];
-                $arr_test_results[$student_id]['NRS'] = is_null($trackingLevel[1]) ? '' : $trackingLevel[1];
+                $trackingLevel = $this->STUDENTS_TRACKING[$student_id];
+                $arr_test_results[$student_id]['tracking'] = $trackingLevel;
+                $arr_test_results[$student_id]['NRS'] = $trackingLevel == 14 ?
+                    $this->getLevel($arr_test_results[$student_id]['preL'], false) :
+                    $this->getLevel($arr_test_results[$student_id]['preR'], true);
             }
         }
         

@@ -311,7 +311,7 @@
         echo $controller->pageStudentTracking();
     });
     
-    $app->get('/students/student-tracking/:student_id', function($student_id) use ($app) {
+    $app->get('/students/get-student-tracking/:student_id', function($student_id) use ($app) {
         $controller = new UF\StudentTrackingController($app);
         echo $controller->getStudentTracking($student_id);
     });
