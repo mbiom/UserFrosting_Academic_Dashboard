@@ -1,0 +1,219 @@
+{% extends "layouts/layout-dashboard.twig" %}
+{% set page_group = "students" %}
+
+{# Set page properties (page.*) here. #}
+{% block page %}
+    {# By putting this in a special block, we ensure that it will be set AFTER the default values are set in the parent template, 
+    but BEFORE the page itself is rendered. #}    
+    {% set page = page | merge({
+        "title"       : "Student Performance",
+        "description" : "Student Performance, authorization rules, add/remove groups, etc."
+    }) %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content %}
+    <div class='panel panel-primary'>
+    <div class='panel-heading'>
+        <h3 class='panel-title'><i class='fa fa-users'></i>Student Performance</h3>
+    </div>
+    
+    <div class='panel-body'>
+        
+        <div class="well well-sm"><strong>Select Class</strong>
+        </div>
+        <table class='table-responsive' id='table-classes'>
+            {% for class in classreference %}
+                {% if loop.index % 10 ==1 %}
+                    <tr>
+                {% endif %}
+                <td><button class="btn-selector class-btn" href="#">{{class.reference_number}}</button></td>
+            {% endfor %}
+        </table>
+        <hr>
+        <div id="sel-conditions" style="display: none">
+            <table>
+            <tr>
+                <td style='padding-right: 50px'><button class="input-sel" id="btn-all-class">All Class Report</button></td>
+                <td style='padding-right: 50px'><input type="text" class="input-sel" id="txt-student" placeholder="Enter Student ID" value=92627334></input></td>
+                <td style='padding-right: 30px'><input type="text" class="input-sel" id="txt-competency" placeholder="Enter Competency"></input></td>
+                <td><p style="color:red">Correct</p>
+                    <label class="label-for-checkbox">Y</label><input type="checkbox" class="checkbox-square" id="chk-yes"></input>
+                    <label class="label-for-checkbox">N</label><input type="checkbox" class="checkbox-square" id="chk-no"></input></td>
+            </tr>
+        </table>
+        </div>
+    </div>
+    <div id="panel-pfm">
+    </div>
+</div>
+
+{% endblock %}
+{% block page_scripts %}
+        <script>            
+            $(document).ready(function() {
+                
+                var selectedClass = "";
+                var pfmData = new Array();
+                
+                //button select class
+                $('.class-btn').on('click', function() {
+                    var $this = $(this);
+                    
+                    $('.class-btn').css("background-color","#337ab7");
+                    $this.css("background-color","green");
+                    
+                    selectedClass = $this.html();
+                    $('#sel-conditions').show();
+                    return false;
+                });
+                
+                //button all class report
+                $('#btn-all-class').on('click', function() {
+                    $("#panel-pfm").html("<p>Loading data. Please wait a minute...</p>");
+                    $.ajax('/forms/public/students/get-performance-by-class/' + selectedClass, {
+                        success: function(data) {
+                            pfmData = JSON.parse(data);
+                            console.log(pfmData);
+                            loadDataOfPfm(pfmData);
+                        }
+                    });
+                });
+                
+                //enter competency number
+                $("#txt-competency").keypress(function(e) {
+                    if(e.which == 13) {
+                        if ($(this).val() == "") {
+                            alert ("Please input competency number.");
+                            return;
+                        }
+                        
+                        $("#panel-pfm").html("<p>Loading data. Please wait a minute...</p>");
+                        $.ajax('/forms/public/students/get-performance-by-competency/' + selectedClass + '_' + $(this).val(), {
+                            success: function(data) {
+                                pfmData = JSON.parse(data);
+                                if (pfmData === null || pfmData.length == 0){
+                                    alert ("Can not find the competency number.");
+                                    return;
+                                }
+                                console.log(pfmData);
+                                loadDataOfPfm(pfmData);
+                            }
+                        });
+                    }
+                });
+                
+                //enter student number
+                $("#txt-student").keypress(function(e) {
+                    if(e.which == 13) {
+                        if ($(this).val() == "") {
+                            alert ("Please input student identifier.");
+                            return;
+                        }
+                        
+                        $("#panel-pfm").html("<p>Loading data. Please wait a minute...</p>");
+                        $.ajax('/forms/public/students/get-performance-by-student/' + $(this).val(), {
+                            success: function(data) {
+                                pfmData = JSON.parse(data);
+                                if (pfmData === null || pfmData.length == 0){
+                                    alert ("Can not find the student.");
+                                    return;
+                                }
+                                console.log(pfmData);
+                                loadDataOfPfm(pfmData);
+                            }
+                        });
+                    }
+                });
+                
+                //checkbutton YES click
+                $('#chk-yes').on('click', function(){
+                    if ($(this).is(':checked')){
+                        $('#chk-no').prop('checked', false);
+                        loadDataWithCorrect(1);
+                    }
+                    else {
+                        loadDataWithCorrect(0);
+                    }
+                });
+                
+                //checkbutton NO click
+                $('#chk-no').on('click', function(){
+                    if ($(this).is(':checked')){
+                        $('#chk-yes').prop('checked', false);
+                        loadDataWithCorrect(2);
+                    }
+                    else {
+                        loadDataWithCorrect(0);
+                    }
+                });
+                
+                function loadDataWithCorrect(correct) {
+                    if (correct == 0) {
+                        loadDataOfPfm(pfmData);
+                    }
+                    else {
+                        var newPfmData = JSON.parse(JSON.stringify(pfmData))
+                        for (var student_id in newPfmData) {
+                            var studentPfm = newPfmData[student_id];
+                            var trackings = new Array('R', 'L');
+                            for (var trkKey in trackings) {
+                                var tracking = trackings[trkKey];
+                                if (studentPfm[tracking] != undefined) {
+                                    if (studentPfm[tracking]['pfm'].length == 0) continue;
+                                    var newPfm = new Array();
+                                    for(var key in studentPfm[tracking]['pfm']) {
+                                        if ((correct == 1 && studentPfm[tracking]['pfm'][key]['correct'] == 'Yes') ||
+                                            (correct == 2 && studentPfm[tracking]['pfm'][key]['correct'] == 'No')) {
+                                            newPfm.push(studentPfm[tracking]['pfm'][key]);
+                                        }
+                                    }
+                                    newPfmData[student_id][tracking]['pfm'] = newPfm;
+                                }
+                            }
+                        }
+                        loadDataOfPfm(newPfmData);
+                    }
+                }
+            });
+            
+            function loadDataOfPfm(pfmData) {
+                var tableHtml = "";
+                    
+                function getHtmlOfTracking(studentPfm ,tracking) {
+                    if (studentPfm[tracking] != undefined) {
+                        if (studentPfm[tracking]['pfm'].length == 0) return;
+                        tableHtml += "<table id='table-performance'><thead><tr><th colspan=5>";
+                        tableHtml += "<table style='width:700px'>";
+                        tableHtml += "<tr><td colspan=3>Student Name:" + studentPfm[tracking]['student_name'] + "</td><td>Student ID:" + student_id + "</td></tr>";
+                        tableHtml += "<tr><td>Form: " + studentPfm[tracking]['form'] + "</td><td>Score:" + studentPfm[tracking]['score'] + "</td><td></td><td>Test Date:" + studentPfm[tracking]['test_date'] + "</td></tr>";
+                        tableHtml += "<tr><td colspan=2>Next Assigned Test: " + studentPfm[tracking]['NAT'] + "</td><td colspan=2>Series:" + studentPfm[tracking]['series'] + "</td></tr>";
+                        tableHtml += "</table></th><tr>";
+                        tableHtml += "<tr><th>Position</th><th>Correct?</th><th>Comp No.</th><th>Task</th><th>Competency Description</th></tr></thead>";
+                        tableHtml += "<tbody>";
+                        for(var key in studentPfm[tracking]['pfm']) {
+                            var pfmRow = studentPfm[tracking]['pfm'][key];
+                            tableHtml += pfmRow['main_comp'] == 'Yes' ? "<tr class='main-comp'>" : "<tr>";
+                            tableHtml += "<td>" + (pfmRow['main_comp'] == 'Yes' ? pfmRow['position'] : "") + "</td>";
+                            tableHtml += "<td>" + pfmRow['correct'] + "</td>";
+                            tableHtml += "<td>" + pfmRow['comp_number'] + "</td>";
+                            tableHtml += "<td>" + (pfmRow['task']==0 ? "" : pfmRow['task']) + "</td>";
+                            tableHtml += "<td>" + pfmRow['comp_description'] + "</td>";
+                            tableHtml += "</tr>";
+                        }
+                        tableHtml += "</tbody></table>";
+                    }
+                }
+                
+                for (var student_id in pfmData) {
+                    var studentPfm = pfmData[student_id];
+                    getHtmlOfTracking(studentPfm, 'R');
+                    getHtmlOfTracking(studentPfm, 'L');
+                }
+                
+                $("#panel-pfm").html(tableHtml);
+            }
+
+        </script>
+{% endblock %}
+

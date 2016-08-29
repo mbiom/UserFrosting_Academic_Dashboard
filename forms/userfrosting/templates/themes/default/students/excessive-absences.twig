@@ -22,17 +22,20 @@
     
     <div class='panel-body'>
         <div class="well well-sm"><strong>Select Class</strong></div>
-        <table width=100% id='table-classes'>
-        {% for class in classreference %}
-            {% if loop.index % 10 == 1 %}
-                <tr>
-            {% endif %}
-            <td><button class="btn-selector class-btn" href="#">{{class.reference_number}}</button></td>
-            {% if loop.index % 10 == 0 %}
-                </tr>
-            {% endif %}
-        {% endfor %}
-        </table>
+        <div style="overflow-x: auto">
+            
+            <table id='table-classes'>
+            {% for class in classreference %}
+                {% if loop.index % 10 == 1 %}
+                    <tr>
+                {% endif %}
+                <td><button class="btn-selector class-btn" href="#">{{class.reference_number}}</button></td>
+                {% if loop.index % 10 == 0 %}
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            </table>
+        </div>
     </div>
     
     <div class="table-responsive">
@@ -63,6 +66,7 @@
                 //console.log(terms);
                 //$('table#table-groups tbody').html()
                 var student_absences;
+                var selectedClassRef;
                 
                 $('.class-btn').on('click', function() {
                     var $this = $(this);
@@ -70,8 +74,8 @@
                     $('.class-btn').css("background-color","#337ab7");
                     $this.css("background-color","green");
                     
-                    var classRef = $this.html();
-                    $.ajax('/students/get-excessive-absences/' + classRef, {
+                    var selectedClassRef = $this.html();
+                    $.ajax('/forms/public/students/get-excessive-absences/' + selectedClassRef, {
                         success: function(data) {
                             student_absences = JSON.parse(data);
                             console.log(student_absences);
@@ -90,7 +94,7 @@
                         tableHtml += '<tr>';
                         tableHtml += '<td>' + (++indexArr) + '</td>';
                         tableHtml += '<td><input type=checkbox class=absence-check id=check_' + student_absences[key].term +"_" + student_absences[key].student_id + (!student_absences[key].checked ? ">" : " checked>") + '</td>';
-                        tableHtml += '<td>' + student_absences[key].first_name + " " + student_absences[key].last_name + '</td>';
+                        tableHtml += '<td>' + capitalizeFirstLetter(student_absences[key].last_name) + ", " + capitalizeFirstLetter(student_absences[key].first_name) + '</td>';
                         tableHtml += '<td><input type=text class=absence-num id=text_' + student_absences[key].term +"_" + student_absences[key].student_id + ' value=' + (!student_absences[key].absences ? "" : student_absences[key].absences) + '></td>';
                         tableHtml += '<td></td>';
                         tableHtml += '</tr>';
@@ -123,10 +127,11 @@
                         checked_students.push(new Array(student_absences[key].term,
                                                         student_absences[key].student_id,
                                                         abs_check.is(':checked') ? 1 : 0,
-                                                        abs_num_text.val()=="" ? "0" : abs_num_text.val()));
+                                                        abs_num_text.val()=="" ? "0" : abs_num_text.val(),
+                                                        selectedClassRef));
                     }
                     
-                    $.ajax('/students/set-excessive-absences/' + arrayToString(checked_students) , {
+                    $.ajax('/forms/public/students/set-excessive-absences/' + arrayToString(checked_students) , {
                         success: function(data) {
                             alert ("Successfully submitted.");
                         }
@@ -157,6 +162,11 @@
                 
                 function isNormalInteger(str) {
                     return /^\+?(0|[1-9]\d*)$/.test(str);
+                }
+                
+                function capitalizeFirstLetter(string) {
+                    string = string.toLowerCase();
+                    return string.charAt(0).toUpperCase() + string.slice(1);
                 }
             });
         </script>

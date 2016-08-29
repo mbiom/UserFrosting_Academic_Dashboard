@@ -96,7 +96,7 @@
                     var button = $(this);
                     var term_Id = button.attr('id');
                         
-                    $.ajax('/students/authorize-promotion/' + term_Id, {
+                    $.ajax('/forms/public/students/authorize-promotion/' + term_Id, {
                         success: function(data) {
                             button.html = "Authorized";
                             button.attr('class', 'btn-authorized');
@@ -111,7 +111,7 @@
                     $this.css("background-color","green");
                     
                     var termId = $this.html();
-                    $.ajax('/students/get-post-test-form/' + termId, {
+                    $.ajax('/forms/public/students/get-post-test-form/' + termId, {
                         success: function(data) {
                             test_results = JSON.parse(data);
                             $('.class-btn').first().click();

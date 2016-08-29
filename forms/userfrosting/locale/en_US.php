@@ -181,8 +181,8 @@ $lang = array_merge($lang,array(
 // Site Content
 $lang = array_merge($lang, [
 	"MENU_STUDENTS" => "Students",
-	"MENU_STUDENTS_PERFORMANCE" => "Students Performance",
-	"MENU_NST" => "Next Assign Test",
+	"MENU_STUDENT_PERFORMANCE" => "Student Performance",
+	"MENU_NAT" => "Next Assign Test",
 	"MENU_PERFORMANCE_SUMMARY" => "Performance Summary",
 	"MENU_EXCESSIVE_ABSENCES" => "Excessive Absences",
 	"MENU_STUDENT_TRACKING" => "Student Tracking",

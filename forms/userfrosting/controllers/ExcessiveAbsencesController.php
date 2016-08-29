@@ -48,6 +48,7 @@ class ExcessiveAbsencesController extends \UserFrosting\BaseController {
     }
     
     public function getExcessiveAbsences($classRef) {
+        
         $students = array();
         
         $term = StudentsBio::queryBuilder()
@@ -63,12 +64,14 @@ class ExcessiveAbsencesController extends \UserFrosting\BaseController {
         $students = StudentsBio::queryBuilder()
             ->leftJoin('uf_excessive_absences as ea', 'ea.student_id', '=', 'uf_students_bio.student_id', 'and', 'ea.term', '=', 'uf_students_bio.term')
             ->where('reference_number', '=', $classRef)
+            ->orderBy('last_name')
             ->get(array('uf_students_bio.*', 'ea.absences', 'ea.checked'));
         
         return json_encode($students);
     }
     
     public function setExcessiveAbsences($student_absences_str) {
+        
         $temp_arr = explode('-', $student_absences_str);
         
         $student_absences = array();
@@ -103,23 +106,40 @@ class ExcessiveAbsencesController extends \UserFrosting\BaseController {
         }
         ExcessiveAbsences::queryBuilder()
             ->insert($insertData);
-            
+        
+        $to = 'yurikonev@hotmail.com';
+
+        $subject = 'Student Absences Report';
+        
+        $headers = "From: nobody@opinadero.com \r\n";
+        $headers .= "Reply-To: nobody@opinadero.com \r\n";
+        $headers .= "MIME-Version: 1.0\r\n";
+        $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+        
+        $message = '<p height=60px>Instructor:</p>';
+        $message .= '<p height=60px>Class Ref:'. $student_absences[0][4] .'</p>';
+        $message .= "<table style='border:1px solid;widh:500px;border-spacing:0px'><tr><td>Student ID</td><td>Student Name</td><td>Number of Absences</td></tr>";
+        foreach ($insertData as $row) {
+            if($row['checked'] == 1) {
+                $message .= "<tr><td>".$row['student_id']."</td><td>".$this->getStudentNameFromId($row['student_id'])."</td><td>".$row['absences']."</td></tr>";
+            }
+        }
+        $message .= '</table>';
+        mail($to, $subject, $message, $headers);
+        
         return "S";
     }
     
-    public function getTestFormOfTerm($term) {
-        $testResults = PostTestForm::queryBuilder()
-            ->where('term', '=', $term)
-            ->orderBy('last_name')
-            ->get();
-        return json_encode($testResults);
-    }
-    
-    public function authoizePromotion($term_id) {
-        PostTestForm::queryBuilder()
-            ->where('term', '=', substr($term_id, 0, 5))
-            ->where('student_id', '=', substr($term_id, 6, strlen($term_id) - 6))
-            ->update(['admin_prom' => 'A']);
-        return json_encode("A");
+    public function getStudentNameFromId($student_id) {
+        $student = StudentsBio::queryBuilder()
+            ->where('student_id', '=', $student_id)
+            ->where('term', '=', $this->LASTTERM)
+            ->get(array('last_name', 'first_name'));
+        if (count($student)) {
+            return $student[0]['last_name'].", ".$student[0]['first_name']; 
+        }
+        else {
+            return "";
+        }
     }
 }

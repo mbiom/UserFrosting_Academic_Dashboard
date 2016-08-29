@@ -6569,14 +6569,15 @@ button.close {
     background-color: #337ab7; /* blue */
     border: none;
     color: white;
-    width: 100px;
-    height: 30px;
+    width: 80px;
+    height: 28px;
     text-align: center;
-    line-height: 30px;
+    line-height: 28px;
     text-decoration: none;
     display: inline-block;
     font-size: 14px;
-    margin: 10px 4px;
+    margin: 6px 4px;
+    border-radius: 6px;
 }
 
 .btn-authorize {
@@ -6626,4 +6627,26 @@ button.close {
     text-align: center;
     font-size: 16px;
 }
+
+input.checkbox-square {
+  width: 20px;
+  height: 20px;
+  position: relative;
+  margin: 10px auto;
+  background: #fcfff4;
+  background: linear-gradient(top, #fcfff4 0%, #dfe5d7 40%, #b3bead 100%);
+  box-shadow: inset 0px 1px 1px white, 0px 1px 3px rgba(0,0,0,0.5);
+  input[type=checkbox] {
+    visibility: hidden;
+    &:checked + label:after {
+      opacity: 1;
+    }    
+  }
+}
+
+#table-performance{font-family:"Lucida Sans Unicode", "Lucida Grande", Sans-Serif;font-size:12px;width:700px;text-align:left;border-collapse:collapse;margin:20px;}
+#table-performance th{font-size:13px;font-weight:normal;background:#b9c9fe;border-top:4px solid #aabcfe;border-bottom:1px solid #fff;color:#039;padding:8px;}
+#table-performance td{background:#e8edff;border-bottom:1px solid #fff;color:#669;border-top:1px solid transparent;padding:8px;}
+#table-performance tr.main-comp td{background:#d0dafd;color:#339;}
+div.table-container {overflow-y: auto;height: 300px;}
 /*# sourceMappingURL=bootstrap.css.map */

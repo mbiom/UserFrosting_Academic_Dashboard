@@ -254,16 +254,26 @@
         return $controller->deleteAuthRule($rule_id);
     });  
         
-    /************ STUDENTS PERFORMANCE*************/
+    /************ STUDENTS *************/
 
-    $app->get('/students/students-performance/?', function () use ($app) {
-        $controller = new UF\StudentsPerformanceController($app);
-        return $controller->pageStudentsPerformance();
+    $app->get('/students/student-performance/?', function () use ($app) {
+        $controller = new UF\StudentPerformanceController($app);
+        return $controller->pageStudentPerformance();
     });
 
-    $app->get('/students/get-students-of-class/:classid', function($classid) use ($app) {
-        $controller = new UF\StudentsPerformanceController($app);
-        echo $controller->getStudentsOfClass($classid);
+    $app->get('/students/get-performance-by-student/:studentid', function($studentid) use ($app) {
+        $controller = new UF\StudentPerformanceController($app);
+        echo $controller->getPerformanceByStudent($studentid);
+    });
+    
+    $app->get('/students/get-performance-by-class/:classid', function($classid) use ($app) {
+        $controller = new UF\StudentPerformanceController($app);
+        echo $controller->getPerformanceByClass($classid);
+    });
+    
+    $app->get('/students/get-performance-by-competency/:compid', function($compid) use ($app) {
+        $controller = new UF\StudentPerformanceController($app);
+        echo $controller->getPerformanceByCompetency($compid);
     });
     
     $app->get('/students/post-test-form/?', function () use ($app) {
@@ -314,6 +324,16 @@
     $app->get('/students/get-student-tracking/:student_id', function($student_id) use ($app) {
         $controller = new UF\StudentTrackingController($app);
         echo $controller->getStudentTracking($student_id);
+    });
+    
+    $app->get('/students/next-assign-test/?', function() use ($app) {
+        $controller = new UF\NextAssignTestController($app);
+        echo $controller->pageNextAssignTest();
+    });
+    
+    $app->get('/students/get-next-assign-test/:classRef', function($classRef) use ($app) {
+        $controller = new UF\NextAssignTestController($app);
+        echo $controller->getNATByClass($classRef);
     });
     /************ ADMIN TOOLS *************/
     

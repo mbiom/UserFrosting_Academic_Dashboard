@@ -26,7 +26,7 @@
         </div>
         <!-- /.panel-heading -->
         <div class="panel-body">
-            <input type="text" class="input-sel" placeholder="Enter Student ID" value=92714395></input>
+            <input type="text" class="input-sel" placeholder="Enter Student ID"></input>
         </div>
         <!-- /.panel-body -->
     </div>
@@ -80,7 +80,7 @@
                         alert ("Please input student identifier.");
                         return;
                     }
-                    $.ajax('/students/get-student-tracking/' + $(this).val(), {
+                    $.ajax('/forms/public/students/get-student-tracking/' + $(this).val(), {
                         success: function(data) {
                             student_tracking_info = JSON.parse(data);
                             if (student_tracking_info === null || student_tracking_info.length == 0){
@@ -110,7 +110,7 @@
                 {
                     tableHtml += '<tr>';
                     tableHtml += '<td>' + test_results[key]['form'] + '</td>';
-                    tableHtml += '<td>' + test_results[key]['test_date'] + '</td>';
+                    tableHtml += '<td>' + convertDateFormat(test_results[key]['test_date']) + '</td>';
                     tableHtml += '<td>' + test_results[key]['score'] + '</td>';
                     tableHtml += '</tr>';
                 }
@@ -126,7 +126,7 @@
                             + "</b> is a <font color=red><b>Returning Student</b></font>" + "</p>";
                     tableHtml += "<p>" + "Student has to take a new <b>PRE TEST</b>" + "</p>";
                     tableHtml += "<p>" + "Last taken test date: <b>"
-                            + student_tracking_info['last_taken'] + "</b> (<b>" + datediff + "</b> days ago)" + "</b></p>";
+                            + convertDateFormat(student_tracking_info['last_taken']) + "</b> (<b>" + datediff + "</b> days ago)" + "</b></p>";
                 }
                 else {
                     tableHtml += "<p><b>" + test_results[0]['student_name'] + "</b></p><hr>";
@@ -143,5 +143,11 @@
                 $('#tracked-info').html(tableHtml);
             }
         });
+        
+        function convertDateFormat(strDate) {
+            function pad(s) { return (s < 10) ? '0' + s : s; }
+            var originalDate = new Date(strDate);
+            return (pad(originalDate.getMonth() + 1)) + '-' + pad(originalDate.getDate()) + '-' +  originalDate.getFullYear();
+        }
     </script>
 {% endblock %}

@@ -1,0 +1,122 @@
+{% extends "layouts/layout-dashboard.twig" %}
+{% set page_group = "students" %}
+
+{# Set page properties (page.*) here. #}
+{% block page %}
+    {# By putting this in a special block, we ensure that it will be set AFTER the default values are set in the parent template, 
+    but BEFORE the page itself is rendered. #}    
+    {% set page = page | merge({
+        "title"       : "Next Assign Test",
+        "description" : ""
+    }) %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content %}
+
+
+<div class='panel panel-primary'>
+    <div class='panel-heading'>
+        <h3 class='panel-title'><i class='fa fa-users'></i>Next Assign Test</h3>
+    </div>
+    
+    <div class='panel-body'>
+        <div class="well well-sm"><strong>Select Class</strong></div>
+        <div style="overflow-x: auto">
+            
+            <table id='table-classes'>
+            {% for class in classreference %}
+                {% if loop.index % 10 == 1 %}
+                    <tr>
+                {% endif %}
+                <td><button class="btn-selector class-btn" href="#">{{class.reference_number}}</button></td>
+                {% if loop.index % 10 == 0 %}
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            </table>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table id="table-nat" class="tablesorter table table-bordered table-hover table-striped tablesorter-bootstrap">
+            <thead>
+                <tr>
+                    <th colspan=2 rowspan=2>Student</th>
+                    <th colspan=6>Last Test</th>
+                    <th colspan=2>Next Assigned Test</th>
+                </tr>
+                <tr>
+                    <th>Class Administered</th>
+                    <th>Date</th>
+                    <th>Form</th>
+                    <th>Level</th>
+                    <th>Raw Score</th>
+                    <th>Scale Score</th>
+                    <th>Form</th>
+                    <th>Test Series</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+{% block page_scripts %}
+    <script>            
+        $(document).ready(function() {
+             var selectedClassRef;
+                
+            $('.class-btn').on('click', function() {
+                var $this = $(this);
+                
+                $('.class-btn').css("background-color","#337ab7");
+                $this.css("background-color","green");
+                
+                var selectedClassRef = $this.html();
+                $.ajax('/forms/public/students/get-next-assign-test/' + selectedClassRef, {
+                    success: function(data) {
+                        var natData = JSON.parse(data);
+                        console.log(natData);
+                        loadDataOfClass(natData);
+                    }
+                });
+                
+                return false;
+            });
+        });
+        
+        function loadDataOfClass(natData) {
+            var tableHtml = '';
+            var lastId = '';
+            for (var key in natData)
+            {
+                tableHtml += '<tr>';
+                if (lastId == natData[key]['student_id'])
+                {
+                    tableHtml += '<td></td><td></td>';
+                }
+                else {
+                    tableHtml += '<td>' + natData[key]['student_name'] + '</td>';
+                    tableHtml += '<td>' + natData[key]['student_id'] + '</td>';
+                }
+                tableHtml += '<td>' + 'N/A' + '</td>';
+                tableHtml += '<td>' + natData[key]['date'] + '</td>';
+                tableHtml += '<td>' + natData[key]['form'] + '</td>';
+                tableHtml += '<td>' + natData[key]['level'] + '</td>';
+                tableHtml += '<td>' + natData[key]['raw_score'] + '</td>';
+                tableHtml += '<td>' + natData[key]['scale_score'] + '</td>';
+                var nextTests = natData[key]['next_form'];
+                tableHtml += '<td>' + nextTests.substring(0, nextTests.indexOf(' ')) + '</td>';
+                tableHtml += '<td>' + nextTests.substring(nextTests.indexOf('(') + 1, nextTests.length - 1) + '</td>';
+                tableHtml += '</tr>';
+                
+                lastId = natData[key]['student_id'];
+            }
+            
+            $('table#table-nat tbody').html(tableHtml);
+            //ufTable('table-tests');
+        }
+    </script>
+{% endblock %}
