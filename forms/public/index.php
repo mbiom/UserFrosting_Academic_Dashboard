@@ -291,6 +291,11 @@
         echo $controller->authoizePromotion($term_id);
     });
     
+    $app->get('/students/add-comment/:term_id', function($term_id) use ($app) {
+        $controller = new UF\PostTestFormController($app);
+        echo $controller->addComment($term_id);
+    });
+    
     $app->get('/students/update-table/?', function () use ($app) {
         $controller = new UF\UpdateTableController($app);
         return $controller->pageUpdateTable();

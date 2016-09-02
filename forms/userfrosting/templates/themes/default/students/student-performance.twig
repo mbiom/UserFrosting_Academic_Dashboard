@@ -19,27 +19,66 @@
     </div>
     
     <div class='panel-body'>
-        
+        <div class="well well-sm"><strong>Select Term</strong></div>
+        <table width=30%>
+            <tr>
+            {% for term in terms %}
+                <td><button class="btn-selector term-btn" href="#">{{term.term}}</button></td>
+            {% endfor %}
+            </tr>
+        </table>
         <div class="well well-sm"><strong>Select Class</strong>
         </div>
-        <table class='table-responsive' id='table-classes'>
-            {% for class in classreference %}
-                {% if loop.index % 10 ==1 %}
-                    <tr>
-                {% endif %}
-                <td><button class="btn-selector class-btn" href="#">{{class.reference_number}}</button></td>
-            {% endfor %}
-        </table>
+        {% if (user.primary_group_id==4 or user.primary_group_id==2) %}
+            <div style="overflow-x: auto">
+                <table id='table-classes'>
+                {% for class in allclasses %}
+                    {% if loop.index % 10 == 1 %}
+                        <tr>
+                    {% endif %}
+                    <td><button class="btn-selector class-btn" href="#">{{class.reference_number}}</button></td>
+                    {% if loop.index % 10 == 0 %}
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+                </table>
+            </div>
+        {% else %}
+            <table class='table-responsive' id='table-classes'><tr>
+                {% for teacher_id,class in classreference %}
+                    {% if teacher_id==user.user_name %}
+                        {% for classref in class %}
+                            <td><button class="btn-selector class-btn" href="#">{{classref}}</button></td>
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+            </tr></table>
+        {% endif %}
         <hr>
+        <div class="well well-sm"><strong>Class Reference: <span id="div-selected-class" /></strong></div>
         <div id="sel-conditions" style="display: none">
             <table>
             <tr>
-                <td style='padding-right: 50px'><button class="input-sel" id="btn-all-class">All Class Report</button></td>
-                <td style='padding-right: 50px'><input type="text" class="input-sel" id="txt-student" placeholder="Enter Student ID" value=92627334></input></td>
-                <td style='padding-right: 30px'><input type="text" class="input-sel" id="txt-competency" placeholder="Enter Competency"></input></td>
-                <td><p style="color:red">Correct</p>
-                    <label class="label-for-checkbox">Y</label><input type="checkbox" class="checkbox-square" id="chk-yes"></input>
-                    <label class="label-for-checkbox">N</label><input type="checkbox" class="checkbox-square" id="chk-no"></input></td>
+                <td style='padding-right: 50px'><button class="sel-button" id="btn-all-class">All Class Report</button></td>
+                <td style='padding-right: 50px'>
+                    <div class="search-container">
+                        <input type="text" class="search-field" id="txt-student" placeholder="Enter Student ID..." />
+                        <div class="submit-container">
+                            <input type="submit" value="" class="search-submit" id="smt-student" />
+                        </div>
+                    </div>
+                </td>
+                <td style='padding-right: 30px'>
+                    <div class="search-container">
+                        <input type="text" class="search-field" id="txt-competency" placeholder="Enter Competency..." />
+                        <div class="submit-container">
+                            <input type="submit" value="" class="search-submit" id="smt-competency" />
+                        </div>
+                    </div>
+                </td>
+                <td style="text-align: center"><p style="color:red;font-weight:bold;">Correct</p>
+                    <label class="label-for-checkbox">Y <input type="checkbox" class="checkbox-square" id="chk-yes"></input></label>
+                    <label class="label-for-checkbox">N <input type="checkbox" class="checkbox-square" id="chk-no"></input></label></td>
             </tr>
         </table>
         </div>
@@ -52,9 +91,19 @@
 {% block page_scripts %}
         <script>            
             $(document).ready(function() {
-                
+                var selectedTerm;
                 var selectedClass = "";
                 var pfmData = new Array();
+                
+                $('.term-btn').on('click', function(){
+                    var $this = $(this);
+                    
+                    $('.term-btn').css("background-color","#337ab7");
+                    $this.css("background-color","green");
+                    
+                    selectedTerm = $this.html();
+                });
+                $('.term-btn').last().trigger( "click" );
                 
                 //button select class
                 $('.class-btn').on('click', function() {
@@ -63,6 +112,7 @@
                     $('.class-btn').css("background-color","#337ab7");
                     $this.css("background-color","green");
                     
+                    $('#div-selected-class').html($this.html());
                     selectedClass = $this.html();
                     $('#sel-conditions').show();
                     return false;
@@ -70,8 +120,10 @@
                 
                 //button all class report
                 $('#btn-all-class').on('click', function() {
-                    $("#panel-pfm").html("<p>Loading data. Please wait a minute...</p>");
-                    $.ajax('/forms/public/students/get-performance-by-class/' + selectedClass, {
+                    $('#txt-student').val("");
+                    $('#txt-competency').val("");
+                    $("#panel-pfm").html("<p style='padding-right:100px; color:red; font-weight:bold;'>Loading data. Please wait a minute...</p>");
+                    $.ajax('/forms/public/students/get-performance-by-class/' + selectedTerm + '_' + selectedClass, {
                         success: function(data) {
                             pfmData = JSON.parse(data);
                             console.log(pfmData);
@@ -81,49 +133,46 @@
                 });
                 
                 //enter competency number
-                $("#txt-competency").keypress(function(e) {
-                    if(e.which == 13) {
-                        if ($(this).val() == "") {
-                            alert ("Please input competency number.");
-                            return;
-                        }
-                        
-                        $("#panel-pfm").html("<p>Loading data. Please wait a minute...</p>");
-                        $.ajax('/forms/public/students/get-performance-by-competency/' + selectedClass + '_' + $(this).val(), {
-                            success: function(data) {
-                                pfmData = JSON.parse(data);
-                                if (pfmData === null || pfmData.length == 0){
-                                    alert ("Can not find the competency number.");
-                                    return;
-                                }
-                                console.log(pfmData);
-                                loadDataOfPfm(pfmData);
-                            }
-                        });
+                $("#smt-competency").on('click', function() {
+                    if ($('#txt-competency').val() == "") {
+                        alert ("Please input competency number.");
+                        return;
                     }
+                    $('#txt-student').val("");
+                    $("#panel-pfm").html("<p style='padding-right:100px; color:red; font-weight:bold;'>Loading data. Please wait a minute...</p>");
+                    $.ajax('/forms/public/students/get-performance-by-competency/' + selectedClass + '_' + $('#txt-competency').val() + '_' + selectedTerm, {
+                        success: function(data) {
+                            pfmData = JSON.parse(data);
+                            if (pfmData === null || pfmData.length == 0){
+                                alert ("Can not find the competency number.");
+                                return;
+                            }
+                            console.log(pfmData);
+                            loadDataOfPfm(pfmData);
+                        }
+                    });
                 });
                 
                 //enter student number
-                $("#txt-student").keypress(function(e) {
-                    if(e.which == 13) {
-                        if ($(this).val() == "") {
-                            alert ("Please input student identifier.");
-                            return;
-                        }
-                        
-                        $("#panel-pfm").html("<p>Loading data. Please wait a minute...</p>");
-                        $.ajax('/forms/public/students/get-performance-by-student/' + $(this).val(), {
-                            success: function(data) {
-                                pfmData = JSON.parse(data);
-                                if (pfmData === null || pfmData.length == 0){
-                                    alert ("Can not find the student.");
-                                    return;
-                                }
-                                console.log(pfmData);
-                                loadDataOfPfm(pfmData);
-                            }
-                        });
+                $("#smt-student").on('click', function() {
+                    
+                    if ($('#txt-student').val() == "") {
+                        alert ("Please input student identifier.");
+                        return;
                     }
+                    $('#txt-competency').val("");
+                    $("#panel-pfm").html("<p style='padding-right:100px; color:red; font-weight:bold;'>Loading data. Please wait a minute...</p>");
+                    $.ajax('/forms/public/students/get-performance-by-student/' + $('#txt-student').val() + '_' + selectedTerm, {
+                        success: function(data) {
+                            pfmData = JSON.parse(data);
+                            if (pfmData === null || pfmData.length == 0){
+                                alert ("Can not find the student.");
+                                return;
+                            }
+                            console.log(pfmData);
+                            loadDataOfPfm(pfmData);
+                        }
+                    });
                 });
                 
                 //checkbutton YES click
@@ -186,8 +235,12 @@
                         tableHtml += "<table id='table-performance'><thead><tr><th colspan=5>";
                         tableHtml += "<table style='width:700px'>";
                         tableHtml += "<tr><td colspan=3>Student Name:" + studentPfm[tracking]['student_name'] + "</td><td>Student ID:" + student_id + "</td></tr>";
-                        tableHtml += "<tr><td>Form: " + studentPfm[tracking]['form'] + "</td><td>Score:" + studentPfm[tracking]['score'] + "</td><td></td><td>Test Date:" + studentPfm[tracking]['test_date'] + "</td></tr>";
-                        tableHtml += "<tr><td colspan=2>Next Assigned Test: " + studentPfm[tracking]['NAT'] + "</td><td colspan=2>Series:" + studentPfm[tracking]['series'] + "</td></tr>";
+                        tableHtml += "<tr><td>Form: " + studentPfm[tracking]['form'] + "</td><td>Score:"
+                                    + studentPfm[tracking]['score'] + "</td><td></td><td>Test Date:"
+                                    + convertDateFormat(studentPfm[tracking]['test_date']) + "</td></tr>";
+                        tableHtml += "<tr><td colspan=2>Next Assigned Test: "
+                                    + studentPfm[tracking]['NAT'] + "</td><td colspan=2>Series:"
+                                    + studentPfm[tracking]['series'] + "</td></tr>";
                         tableHtml += "</table></th><tr>";
                         tableHtml += "<tr><th>Position</th><th>Correct?</th><th>Comp No.</th><th>Task</th><th>Competency Description</th></tr></thead>";
                         tableHtml += "<tbody>";
@@ -213,7 +266,12 @@
                 
                 $("#panel-pfm").html(tableHtml);
             }
-
+            
+            function convertDateFormat(strDate) {
+                function pad(s) { return (s < 10) ? '0' + s : s; }
+                var originalDate = new Date(strDate);
+                return (pad(originalDate.getMonth() + 1)) + '-' + pad(originalDate.getDate()) + '-' +  originalDate.getFullYear();
+            }
         </script>
 {% endblock %}
 

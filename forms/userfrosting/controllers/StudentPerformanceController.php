@@ -33,25 +33,43 @@ class StudentPerformanceController extends \UserFrosting\BaseController {
     public function pageStudentPerformance(){
         // Access-controlled page
 
-        $ClassReference = StudentsBio::queryBuilder()
+        $ClassReferences = StudentsBio::queryBuilder()
+            ->groupBy('teacher_id')
             ->groupBy('reference_number')
-            ->where('term', '=', '20153')
+            ->get(array('teacher_id', 'reference_number'));
+            
+        $TeacherClasses = array();
+        foreach($ClassReferences as $classRef) {
+            if (!array_key_exists($classRef['teacher_id'], $TeacherClasses))
+                $TeacherClasses[$classRef['teacher_id']] = array();
+                
+            array_push($TeacherClasses[$classRef['teacher_id']], $classRef['reference_number']);
+        }
+        
+        $AllClasses = StudentsBio::queryBuilder()
+            ->groupBy('reference_number')
             ->get(array('reference_number'));
-
+        
         $Terms = StudentsBio::queryBuilder()
             ->groupBy('term')
             ->where('term', '<>', '20152')
-            ->get();
+            ->get(array('term'));
             
         $this->_app->render('students/student-performance.twig', [
-           "classreference" => $ClassReference,
+           "classreference" => $TeacherClasses,
+           "allclasses" => $AllClasses,
            "terms" => $Terms
-        ]);
+        ]);  
     }
     
     public function getPerformanceByClass($classId) {
+        $arr_param = explode('_', $classId);
+        $term = $arr_param[0];
+        $classId = $arr_param[1];
+        
         $students = StudentsBio::queryBuilder()
             ->where('reference_number', '=', $classId)
+            ->where('term', '=', $term)
             ->groupBy('student_id')
             ->orderBy('last_name')
             ->get(array('student_id'));
@@ -60,8 +78,8 @@ class StudentPerformanceController extends \UserFrosting\BaseController {
         foreach($students as $student) {
             $pfm_data[$student['student_id']] = array();
         
-            $reading_pfms = $this->getRLPerformanceOfStudent($student['student_id'], true);
-            $listening_pfms = $this->getRLPerformanceOfStudent($student['student_id'], false);
+            $reading_pfms = $this->getRLPerformanceOfStudent($student['student_id'], true, $term);
+            $listening_pfms = $this->getRLPerformanceOfStudent($student['student_id'], false, $term);
             if (count($reading_pfms) > 0) $pfm_data[$student['student_id']]['R'] = $reading_pfms;
             if (count($listening_pfms) > 0) $pfm_data[$student['student_id']]['L'] = $listening_pfms;
         }
@@ -70,11 +88,15 @@ class StudentPerformanceController extends \UserFrosting\BaseController {
     }
     
     public function getPerformanceByStudent($studentId) {
+        $arr_param = explode('_', $studentId);
+        $term = $arr_param[1];
+        $studentId = $arr_param[0];
+        
         $pfm_data = array();
         $pfm_data[$studentId] = array();
         
-        $reading_pfms = $this->getRLPerformanceOfStudent($studentId, true);
-        $listening_pfms = $this->getRLPerformanceOfStudent($studentId, false);
+        $reading_pfms = $this->getRLPerformanceOfStudent($studentId, true, $term);
+        $listening_pfms = $this->getRLPerformanceOfStudent($studentId, false, $term);
         if (count($reading_pfms) > 0) $pfm_data[$studentId]['R'] = $reading_pfms;
         if (count($listening_pfms) > 0) $pfm_data[$studentId]['L'] = $listening_pfms;
         
@@ -85,9 +107,11 @@ class StudentPerformanceController extends \UserFrosting\BaseController {
         $arr_param = explode('_', $compId);
         $classId = $arr_param[0];
         $compId = $arr_param[1];
+        $term = $arr_param[2];
         
         $students = StudentsBio::queryBuilder()
             ->where('reference_number', '=', $classId)
+            ->where('term', '=', $term)
             ->groupBy('student_id')
             ->orderBy('last_name')
             ->get(array('student_id'));
@@ -96,8 +120,8 @@ class StudentPerformanceController extends \UserFrosting\BaseController {
         foreach($students as $student) {
             $pfm_data[$student['student_id']] = array();
         
-            $reading_pfms = $this->getRLPerformanceOfStudent($student['student_id'], true, $compId);
-            $listening_pfms = $this->getRLPerformanceOfStudent($student['student_id'], false, $compId);
+            $reading_pfms = $this->getRLPerformanceOfStudent($student['student_id'], true, $term, $compId);
+            $listening_pfms = $this->getRLPerformanceOfStudent($student['student_id'], false, $term, $compId);
             if (count($reading_pfms) > 0) $pfm_data[$student['student_id']]['R'] = $reading_pfms;
             if (count($listening_pfms) > 0) $pfm_data[$student['student_id']]['L'] = $listening_pfms;
         }
@@ -105,19 +129,19 @@ class StudentPerformanceController extends \UserFrosting\BaseController {
         return json_encode($pfm_data);
     }
     
-    public function getRLPerformanceOfStudent($student_id, $isReading, $compNo="") {
+    public function getRLPerformanceOfStudent($student_id, $isReading, $term, $compNo="") {
         $pfm_data = array();
         $pfms = StudentPerformance::queryBuilder()
-            ->where('term', '=', $this->LASTTERM)
+            ->where('term', '=', $term)
             ->where('student_id', '=', $student_id)
             ->where('form', 'regexp', $isReading ? 'R':'L')
             ->orderBy('position', 'asc')
             ->orderBy('main_comp', 'desc')
             ->get();
-            
+        
         if(count($pfms) > 0) {
             $accurate = TestResults::queryBuilder()
-                ->where('term', '=', $this->LASTTERM)
+                ->where('term', '=', $term)
                 ->where('student_id', '=', $student_id)
                 ->where('form', '=', $pfms[0]['form'])
                 ->get();
@@ -128,8 +152,19 @@ class StudentPerformanceController extends \UserFrosting\BaseController {
                 $pfm_data['form'] = $pfms[0]['form'];
                 $pfm_data['score'] = $pfms[0]['scale_score'];
                 $pfm_data['test_date'] = $pfms[0]['test_date'];
-                $pfm_data['NAT'] = '';
-                $pfm_data['series'] = '';
+                $nat_data = NextAssignTest::queryBuilder()
+                    ->where('term', '=', $term)
+                    ->where('student_id', '=', $student_id)
+                    ->where('form', 'regexp', $isReading ? 'R':'L')
+                    ->get(array('next_form'));
+                if(count($nat_data) > 0) {
+                    $nat_data = $nat_data[0]['next_form'];
+                    $nat_data = explode('(', $nat_data);
+                    if(count($nat_data) > 1) {
+                        $pfm_data['NAT'] = substr($nat_data[0], 0, strlen($nat_data[0]) - 1);
+                        $pfm_data['series'] = substr($nat_data[1], 1, strlen($nat_data[1]) - 2);
+                    }
+                }
                 
                 $pfm_data['pfm'] = array();
                 $positions = array();  //positions that have specific competency number
@@ -159,9 +194,9 @@ class StudentPerformanceController extends \UserFrosting\BaseController {
         return $pfm_data;
     }
     
-    public function getRLPerformanceForCompetency($compNo, $isReading, $success=-1) {
+    public function getRLPerformanceForCompetency($compNo, $isReading, $term, $success=-1) {
         $positions = StudentPerformance::queryBuilder()
-            ->where('term', '=', $this->LASTTERM)
+            ->where('term', '=', $term)
             ->where('student_id', '=', $student_id)
             ->where('form', 'regexp', $isReading ? 'R':'L')
             ->orderBy('position', 'asc')

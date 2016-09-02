@@ -33,46 +33,70 @@ class ExcessiveAbsencesController extends \UserFrosting\BaseController {
      */
     public function pageExcessiveAbsences(){
         // Access-controlled page
-        $ClassReference = StudentsBio::queryBuilder()
+        $ClassReferences = StudentsBio::queryBuilder()
+            ->where('term', '=', $this->LASTTERM)
+            ->groupBy('teacher_id')
             ->groupBy('reference_number')
+            ->get(array('teacher_id', 'reference_number'));
+            
+        $TeacherClasses = array();
+        foreach($ClassReferences as $classRef) {
+            if (!array_key_exists($classRef['teacher_id'], $TeacherClasses))
+                $TeacherClasses[$classRef['teacher_id']] = array();
+                
+            array_push($TeacherClasses[$classRef['teacher_id']], $classRef['reference_number']);
+        }
+        
+        $AllClasses = StudentsBio::queryBuilder()
+            ->groupBy('reference_number')
+            ->where('term', '=', $this->LASTTERM)
             ->get(array('reference_number'));
-
+        
         $Terms = StudentsBio::queryBuilder()
             ->groupBy('term')
-            ->get();
+            ->where('term', '<>', '20152')
+            ->get(array('term'));
             
         $this->_app->render('students/excessive-absences.twig', [
-           "classreference" => $ClassReference,
+           "classreference" => $TeacherClasses,
+           "allclasses" => $AllClasses,
            "terms" => $Terms
         ]);
     }
     
     public function getExcessiveAbsences($classRef) {
+        $arr_param = explode('_', $classRef);
+        $term = $arr_param[0];
+        $classRef = $arr_param[1];
         
         $students = array();
-        
-        $term = StudentsBio::queryBuilder()
-            ->groupBy('term')
-            ->orderBy('term', 'desc')
-            ->first();
-        
-        if (is_null($term))
-            return json_encode($students);
-        
-        $term = $term['term'];
         
         $students = StudentsBio::queryBuilder()
             ->leftJoin('uf_excessive_absences as ea', 'ea.student_id', '=', 'uf_students_bio.student_id', 'and', 'ea.term', '=', 'uf_students_bio.term')
             ->where('reference_number', '=', $classRef)
+            ->where('uf_students_bio.term', '=', $term)
             ->orderBy('last_name')
             ->get(array('uf_students_bio.*', 'ea.absences', 'ea.checked'));
         
+        foreach ($students as $key => $student) {
+            if (is_null($student['checked'])) {
+                $students[$key]['checked'] = 0;
+            }
+            if (is_null($student['absences'])) {
+                $students[$key]['absences'] = 0;
+            }
+        }
         return json_encode($students);
     }
     
     public function setExcessiveAbsences($student_absences_str) {
         
         $temp_arr = explode('-', $student_absences_str);
+        $commonInfo = array_pop ($temp_arr);
+        $commonInfo = explode('_', $commonInfo);
+        $term = $commonInfo[0];
+        $classId = $commonInfo[1];
+        $userId = $commonInfo[2];
         
         $student_absences = array();
         foreach($temp_arr as $temp_line) {
@@ -84,11 +108,10 @@ class ExcessiveAbsencesController extends \UserFrosting\BaseController {
         if (count($student_absences) == 0)
             return "F";
         
-        $term = $student_absences[0][0];
         foreach ($student_absences as $student_absence) {
             ExcessiveAbsences::queryBuilder()
                 ->where('term', '=', $term)
-                ->where('student_id', '=', $student_absence[1])
+                ->where('student_id', '=', $student_absence[0])
                 ->delete();
         }
         
@@ -98,16 +121,28 @@ class ExcessiveAbsencesController extends \UserFrosting\BaseController {
             
             $row = array(
                 'term'  => $term,
-                'student_id'  => $student_absence[1],
-                'checked'  => $student_absence[2],
-                'absences'  => $student_absence[3]
+                'student_id'  => $student_absence[0],
+                'checked'  => $student_absence[1],
+                'absences'  => $student_absence[2]
             );
             array_push($insertData, $row);
         }
         ExcessiveAbsences::queryBuilder()
             ->insert($insertData);
         
-        $to = 'yurikonev@hotmail.com';
+        $recipients = User::queryBuilder()
+            ->leftJoin('uf_group', 'uf_user.primary_group_id', '=', 'uf_group.id')
+            ->whereIn('uf_group.id', array(2,4,7))
+            ->get(array('email'));
+        
+        $headerRecipients = "";
+        foreach ($recipients as $recipient) {
+            $headerRecipients .= $recipient['email'] . ',';
+        }
+        if (strlen($headerRecipients) > 1) $headerRecipients = substr($headerRecipients, 0 , strlen($headerRecipients) - 1);
+        
+        $to = $headerRecipients;
+        //$to = "yurikonev@hotmail.com";
 
         $subject = 'Student Absences Report';
         
@@ -116,17 +151,28 @@ class ExcessiveAbsencesController extends \UserFrosting\BaseController {
         $headers .= "MIME-Version: 1.0\r\n";
         $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
         
-        $message = '<p height=60px>Instructor:</p>';
-        $message .= '<p height=60px>Class Ref:'. $student_absences[0][4] .'</p>';
-        $message .= "<table style='border:1px solid;widh:500px;border-spacing:0px'><tr><td>Student ID</td><td>Student Name</td><td>Number of Absences</td></tr>";
+        $message = "<div style='padding:20px 20px'><p style='padding-top:20px'>Instructor: <b>".$userId."</b></p>";
+        $message .= "<p style='padding:20px 0px 20px 0px'>Class Ref: <b>". $classId ."</b></p>";
+        $message .= "<table style='border: 1px solid;border-collapse:collapse;'>
+                    <tr style='height:50px'><td style='border: 1px solid;font-weight:bold;text-align:center;width:150px;'>Student ID</td>
+                    <td style='border: 1px solid;font-weight:bold;text-align:center;width:350px;'>Student Name</td>
+                    <td style='border: 1px solid;font-weight:bold;text-align:center;'>Number of Absences</td></tr>";
+        
+        $willSend = false;
         foreach ($insertData as $row) {
             if($row['checked'] == 1) {
-                $message .= "<tr><td>".$row['student_id']."</td><td>".$this->getStudentNameFromId($row['student_id'])."</td><td>".$row['absences']."</td></tr>";
+                $willSend = true;
+                $message .= "<tr style='height:30px'><td style='border: 1px solid;'>".$row['student_id']."</td><td style='border: 1px solid;'>".$this->getStudentNameFromId($row['student_id'])."</td><td style='border: 1px solid;'>".$row['absences']."</td></tr>";
             }
         }
         $message .= '</table>';
-        mail($to, $subject, $message, $headers);
         
+        $message .= "<p style='padding-top:20px'>Today's Date: " .date('m-d-Y'). "</p><div>";
+        
+        //var_dump($message);
+        if ($willSend)
+            mail($to, $subject, $message, $headers);
+            
         return "S";
     }
     

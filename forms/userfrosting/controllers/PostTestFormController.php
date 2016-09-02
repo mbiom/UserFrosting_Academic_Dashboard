@@ -31,11 +31,11 @@ class PostTestFormController extends \UserFrosting\BaseController {
      * Request type: GET
      * @todo implement interface to modify authorization hooks and permissions
      */
+    
     public function pagePostTestForm(){
         // Access-controlled page
         $ClassReference = StudentsBio::queryBuilder()
             ->groupBy('reference_number')
-            ->where('term', '=', '20153')
             ->get(array('reference_number'));
 
         $Terms = StudentsBio::queryBuilder()
@@ -66,10 +66,27 @@ class PostTestFormController extends \UserFrosting\BaseController {
     }
     
     public function authoizePromotion($term_id) {
+        $arr_param = explode('_', $term_id); //termid_studentid_adminname
         PostTestForm::queryBuilder()
-            ->where('term', '=', substr($term_id, 0, 5))
-            ->where('student_id', '=', substr($term_id, 6, strlen($term_id) - 6))
-            ->update(['admin_prom' => 'A']);
+            ->where('term', '=', $arr_param[0])
+            ->where('student_id', '=', $arr_param[1])
+            ->update(['admin_prom' => 'A'.$arr_param[2]]);
         return json_encode("A");
+    }
+    
+    public function addComment($term_id) {
+        $arr_param = explode('_', $term_id); //termid_studentid_adminname
+        var_dump($term_id);
+        $oldComments = PostTestForm::queryBuilder()
+            ->where('term', '=', $arr_param[0])
+            ->where('student_id', '=', $arr_param[1])
+            ->get(array('comments'));
+        $oldComment = $oldComments[0]['comments'];
+            
+        PostTestForm::queryBuilder()
+            ->where('term', '=', $arr_param[0])
+            ->where('student_id', '=', $arr_param[1])
+            ->update(['comments' => $oldComment . $arr_param[2]."<br>"]);
+        return json_encode("S");
     }
 }

@@ -50,28 +50,7 @@ class UpdateTableController extends \UserFrosting\BaseController {
             ->get(array('reference_number'));
         return json_encode($classRefs);
     }
-    
-    public function updateTestFormTable() {
-        //get trackings from tracking table
-        $this->STUDENTS_TRACKING = array();
-        $trackings = StudentsTracking::queryBuilder()
-            ->get();
-            
-        foreach ($trackings as $tracking) {
-            $this->STUDENTS_TRACKING[$tracking['student_id']] = $tracking['tracking'];
-        }
-        //update table where last term
-        $terms = TestResults::queryBuilder()
-            ->where('term', '<>', '')
-            ->groupBy('term')
-            ->orderBy('term', 'desc')
-            ->get(array('term'));
-        
-        $this->updatePostTestFormTable($terms[0]['term']);
-        //$this->updateTrackingTable();
-        return json_encode("Ok");
-    }
-    
+    // update tracking table first
     public function updateTrackingTable() {
         StudentsTracking::queryBuilder()
             ->delete();
@@ -120,8 +99,29 @@ class UpdateTableController extends \UserFrosting\BaseController {
         return "";
     }
     
-    public function updatePostTestFormTable($term) {
+    public function updateTestFormTable() {
+        //get trackings from tracking table
+        $this->STUDENTS_TRACKING = array();
+        $trackings = StudentsTracking::queryBuilder()
+            ->get();
+            
+        foreach ($trackings as $tracking) {
+            $this->STUDENTS_TRACKING[$tracking['student_id']] = $tracking['tracking'];
+        }
+        //update table where last term
+        $terms = TestResults::queryBuilder()
+            ->where('term', '<>', '')
+            ->groupBy('term')
+            ->orderBy('term', 'desc')
+            ->get(array('term'));
         
+        $this->updatePostTestFormTable($terms[0]['term']);
+        //$this->updateTrackingTable();
+        return json_encode("Ok");
+    }
+    
+    public function updatePostTestFormTable($term) {
+        //get students list of term from studentsbio
         $students = StudentsBio::queryBuilder()
             ->where('term', '=', $term)
             ->where('status_code', '<>', 'W')
@@ -196,7 +196,7 @@ class UpdateTableController extends \UserFrosting\BaseController {
         //get NRS, tracking
         foreach ($arr_test_results as $student_id => $test_result) {
             if (!array_key_exists("preR", $test_result) || !array_key_exists("preL", $test_result)) {
-                $arr_test_results[$student_id]['comments'] = "Check testing";
+                $arr_test_results[$student_id]['flags'] = "Check testing";
             }
             else {
                 $trackingLevel = $this->STUDENTS_TRACKING[$student_id];
@@ -242,12 +242,13 @@ class UpdateTableController extends \UserFrosting\BaseController {
                 $arr_test_results[$student_id]['nextLevel'] = $postLevel;
                 $arr_test_results[$student_id]['autoProm'] = "";
                 $arr_test_results[$student_id]['adminProm'] ="";
+                $arr_test_results[$student_id]['flags'] ="";
                 $arr_test_results[$student_id]['comments'] ="";
                 
                 if ($postScore - $preScore < 0) {
                     $arr_test_results[$student_id]['nextLevel'] = $test_result['NRS'];
                     if ($uplevels < 0)
-                        $arr_test_results[$student_id]['comments'] ="Downgraded Level";
+                        $arr_test_results[$student_id]['flags'] ="Downgraded Level";
                 }
                 else if ($uplevels == 0) {
                     if ($endOfLevel) {
@@ -268,7 +269,7 @@ class UpdateTableController extends \UserFrosting\BaseController {
                         substr($earnedLCPs, 0, strlen($earnedLCPs)-1) : "";
                     $arr_test_results[$student_id]['LCPTotal'] = $uplevels;
                     if ($uplevels > 1)
-                        $arr_test_results[$student_id]['comments'] ="Skipped " . ($uplevels == 2 ? "Level" : ($uplevels-1)." Levels");
+                        $arr_test_results[$student_id]['flags'] ="Skipped " . ($uplevels == 2 ? "Level" : ($uplevels-1)." Levels");
                 }
             }
         }
@@ -281,7 +282,7 @@ class UpdateTableController extends \UserFrosting\BaseController {
         }
         
         //format array result
-        $check_fields = array('NRS', 'preR', 'postR', 'progR', 'preL', 'postL', 'progL', 'tracking', 'LCPEarned', 'LCP', 'LCPTotal', 'nextLevel', 'autoProm', 'adminProm', 'comments');
+        $check_fields = array('NRS', 'preR', 'postR', 'progR', 'preL', 'postL', 'progL', 'tracking', 'LCPEarned', 'LCP', 'LCPTotal', 'nextLevel', 'autoProm', 'adminProm', 'flags', 'comments');
         foreach ($arr_test_results as $key => $test_result) {
             foreach ($check_fields as $fieldname) {
                 if (!array_key_exists($fieldname, $test_result)){
@@ -328,6 +329,7 @@ class UpdateTableController extends \UserFrosting\BaseController {
                 'next_level'  => $test_result['nextLevel'],
                 'auto_prom'  => $test_result['autoProm'],
                 'admin_prom'  => $test_result['adminProm'],
+                'flags'  => $test_result['flags'],
                 'comments'  => $test_result['comments']
                 );
             array_push($insertData, $row);

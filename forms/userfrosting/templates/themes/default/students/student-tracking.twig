@@ -26,12 +26,17 @@
         </div>
         <!-- /.panel-heading -->
         <div class="panel-body">
-            <input type="text" class="input-sel" placeholder="Enter Student ID"></input>
+            <div class="search-container">
+                <input type="text" class="search-field" id="txt-student" placeholder="Enter Student ID..." />
+                <div class="submit-container">
+                    <input type="submit" value="" class="search-submit" id="smt-student" />
+                </div>
+            </div>
         </div>
         <!-- /.panel-body -->
     </div>
     
-    <div class="panel panel-default">
+    <div id='div-std-data' style="display: none;">
         <div class="panel-heading" id="std-name">
             Name
         </div>
@@ -74,24 +79,25 @@
         $(document).ready(function() {
             
             var student_tracking_info;
-            $(".input-sel").keypress(function(e) {
-                if(e.which == 13) {
-                    if ($(this).val() == "") {
-                        alert ("Please input student identifier.");
-                        return;
-                    }
-                    $.ajax('/forms/public/students/get-student-tracking/' + $(this).val(), {
-                        success: function(data) {
-                            student_tracking_info = JSON.parse(data);
-                            if (student_tracking_info === null || student_tracking_info.length == 0){
-                                alert ("Can not find the student.");
-                                return;
-                            }
-                            console.log(student_tracking_info);
-                            loadDataOfTests();
-                        }
-                    });
+            //enter student number
+            $("#smt-student").on('click', function() {
+                if ($('#txt-student').val() == "") {
+                    alert ("Please input student identifier.");
+                    return;
                 }
+                
+                $('#div-std-data').show();
+                $.ajax('/forms/public/students/get-student-tracking/' + $('#txt-student').val(), {
+                    success: function(data) {
+                        student_tracking_info = JSON.parse(data);
+                        if (student_tracking_info === null || student_tracking_info.length == 0){
+                            alert ("Can not find the student.");
+                            return;
+                        }
+                        console.log(student_tracking_info);
+                        loadDataOfTests();
+                    }
+                });
             });
             
             var level_names = {"FO": "Foundations",
@@ -134,7 +140,9 @@
                     tableHtml += "<p>" + "Last taken test date: <b>" + student_tracking_info['last_taken'] + "</b> (<b>" + datediff + "</b> days ago)" + "</p>";
                     tableHtml += "<p>" + "Current Level: <b>" + level_names[student_tracking_info['nrs_level']] + "</b></p>";
                     tableHtml += "<p>" + "Tracking: <b>" + (student_tracking_info['tracking'] == 10 ? "Reading" : "Listening") + "</b></p>";
-                    tableHtml += "<p>" + (student_tracking_info['admin_prom'] == 'A' ? "Administrator authorized promotion" : "") + "</p>";
+                    tableHtml += "<p>" + (student_tracking_info['admin_prom'].charAt(0) == 'A' ?
+                                          "Administrator " + student_tracking_info['admin_prom'].substring(1, student_tracking_info['admin_prom'].length) + " authorized promotion"
+                                          : "") + "</p>";
                     tableHtml += "<p>" + (student_tracking_info['auto_prom'] == 'C' ? "AUTOMATIC PROMOTION" : "") + "</p>";
                     tableHtml += "<p>" + student_tracking_info['comments'] + "</p>";
                 }

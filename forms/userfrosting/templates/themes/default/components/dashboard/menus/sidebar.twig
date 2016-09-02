@@ -51,26 +51,36 @@
         <li>
             <a href="#"><i class="fa fa-wrench fa-fw"></i> {{ translate("MENU_STUDENTS") }}<span class="fa arrow"></span></a>
             <ul class="nav nav-second-level">
+                {% if checkAccess('uri_student_performance') %}
                 <li>
                     <a href="{{site.uri.public}}/students/student-performance"><i class="fa fa-tags fa-fw"></i> {{ translate("MENU_STUDENT_PERFORMANCE") }}</a>
                 </li>
+                {% endif %}
+                {% if checkAccess('uri_next_assign_test') %}
                 <li>
                     <a href="{{site.uri.public}}/students/next-assign-test"><i class="fa fa-tags fa-fw"></i> {{ translate("MENU_NAT") }}</a>
                 </li>
+                {% endif %}
+                {% if checkAccess('uri_post_test_form') %}
                 <li>
                     <a href="{{site.uri.public}}/students/post-test-form"><i class="fa fa-tags fa-fw"></i> {{ translate("MENU_POST_TEST_FORM") }}</a>
                 </li>
-                
+                {% endif %}
+                {% if checkAccess('uri_update_table') %}
                 <li>
                     <a href="{{site.uri.public}}/students/update-table"><i class="fa fa-tags fa-fw"></i> {{ translate("MENU_UPDATE_TABLE") }}</a>
                 </li>
-                
+                {% endif %}
+                {% if checkAccess('uri_excessive_absences') %}
                 <li>
                     <a href="{{site.uri.public}}/students/excessive-absences"><i class="fa fa-tags fa-fw"></i> {{ translate("MENU_EXCESSIVE_ABSENCES") }}</a>
                 </li>
+                {% endif %}
+                {% if checkAccess('uri_student_tracking') %}
                 <li>
                     <a href="{{site.uri.public}}/students/student-tracking"><i class="fa fa-tags fa-fw"></i> {{ translate("MENU_STUDENT_TRACKING") }}</a>
                 </li>
+                {% endif %}
             </ul>
         </li>
     </ul>

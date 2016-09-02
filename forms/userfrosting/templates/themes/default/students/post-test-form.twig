@@ -32,17 +32,19 @@
         
         <div class="well well-sm"><strong>Select Class</strong>
         </div>
-        <table width=100% id='table-classes'>
-            <tr>
-                <td><a id="all_class" class="btn-selector class-btn" href="#">All Classes</button></td>
-            </tr>
-        {% for class in classreference %}
-            {% if loop.index % 10 ==1 %}
+        <div style="overflow-x: auto">
+            <table id='table-classes'>
                 <tr>
-            {% endif %}
-            <td><button class="btn-selector class-btn" href="#">{{class.reference_number}}</button></td>
-        {% endfor %}
-        </table>
+                    <td><a id="all_class" class="btn-selector class-btn" href="#">All Classes</button></td>
+                </tr>
+            {% for class in classreference %}
+                {% if loop.index % 10 ==1 %}
+                    <tr>
+                {% endif %}
+                <td><button class="btn-selector class-btn" href="#">{{class.reference_number}}</button></td>
+            {% endfor %}
+            </table>
+        </div>
     </div>
     
     <div class="table-responsive">
@@ -75,6 +77,7 @@
                     <th data-column-name="column-17">Next Level </th>
                     <th data-column-name="column-18">Automatic<br> Promotion </th>
                     <th data-column-name="column-19">Admin<br> Promotion </th>
+                    <th data-column-name="column-20">Flags </th>
                     <th data-column-name="column-21">Comments </th>
                 </tr>
             </thead>
@@ -82,106 +85,126 @@
             </tbody>
         </table>
     </div>
+    <a id="user-name" href="#" style="display: none;">{{ user.display_name }}</a>
 </div>
 {% endblock %}
 {% block page_scripts %}
-        <script>            
-            $(document).ready(function() {
-                //console.log(terms);
-                //$('table#table-groups tbody').html()
-                var test_results;
+    <script>            
+        $(document).ready(function() {
+            //console.log(terms);
+            //$('table#table-groups tbody').html()
+            var test_results;
+            
+            $('table#table-tests').on('click', '.auth-btn', function() {
                 
-                $('table#table-tests').on('click', '.auth-btn', function() {
+                var button = $(this);
+                var term_Id = button.attr('id').substr(5,button.attr('id').length-5);
                     
-                    var button = $(this);
-                    var term_Id = button.attr('id');
-                        
-                    $.ajax('/forms/public/students/authorize-promotion/' + term_Id, {
-                        success: function(data) {
-                            button.html = "Authorized";
-                            button.attr('class', 'btn-authorized');
-                        }
-                    });
-                });
-                
-                $('.term-btn').on('click', function(){
-                    var $this = $(this);
-                    
-                    $('.term-btn').css("background-color","#337ab7");
-                    $this.css("background-color","green");
-                    
-                    var termId = $this.html();
-                    $.ajax('/forms/public/students/get-post-test-form/' + termId, {
-                        success: function(data) {
-                            test_results = JSON.parse(data);
-                            $('.class-btn').first().click();
-                        }
-                    });
-                });
-                
-                $('.class-btn').on('click', function() {
-                    var $this = $(this);
-                    
-                    $('.class-btn').css("background-color","#337ab7");
-                    $this.css("background-color","green");
-                    
-                    var classId = $this.html();
-                    loadResutlsOfClass(classId);
-                    return false;
-                });
-                
-                $('.term-btn').first().trigger( "click" );
-
-                function loadResutlsOfClass(classId) {
-                    var tableHtml = '';
-                    var indexArr = 0;
-                    for (var key in test_results) {
-                        if (test_results[key].reference_number != classId && classId != "All Classes")
-                            continue;
-                        
-                        tableHtml += '<tr>';
-                        tableHtml += '<td>' + (++indexArr) + '</td>';
-                        tableHtml += '<td>' + test_results[key].reference_number + '</td>';
-                        tableHtml += '<td>' + capitalizeFirstLetter(test_results[key].last_name) + '</td>';
-                        tableHtml += '<td>' + capitalizeFirstLetter(test_results[key].first_name) + '</td>';
-                        tableHtml += '<td>' + test_results[key].student_id + '</td>';
-                        tableHtml += '<td>' + test_results[key].telephone + '</td>';
-                        tableHtml += '<td>' + test_results[key].nrs_level + '</td>';
-                        tableHtml += '<td>' + fixZ(test_results[key].pre_reading) + '</td>';
-                        tableHtml += '<td>' + fixZ(test_results[key].post_reading) + '</td>';
-                        tableHtml += '<td>' + test_results[key].prog_reading + '</td>';
-                        tableHtml += '<td>' + fixZ(test_results[key].pre_listening) + '</td>';
-                        tableHtml += '<td>' + fixZ(test_results[key].post_listening) + '</td>';
-                        tableHtml += '<td>' + test_results[key].prog_listening + '</td>';
-                        tableHtml += '<td>' + fixZ(test_results[key].tracking) + '</td>';
-                        tableHtml += '<td>' + test_results[key].lcp_earned + '</td>';
-                        tableHtml += '<td>' + test_results[key].lcp + '</td>';
-                        tableHtml += '<td>' + test_results[key].lcp_total + '</td>';
-                        tableHtml += '<td>' + test_results[key].next_level + '</td>';
-                        tableHtml += '<td>' + (test_results[key].auto_prom=="C" ? '<input type=checkbox checked>' : "&nbsp") + '</td>';
-                        tableHtml += "<td>" +
-                                        (test_results[key].admin_prom=="C" ?
-                                         "<input type=checkbox checked disabled><button class='btn-authorize auth-btn' id=" + (test_results[key].term) + "_" + test_results[key].student_id + ">Authorize</button>" :
-                                        (test_results[key].admin_prom=="A" ?
-                                           "<input type=checkbox checked disabled><button class='btn-authorized'>Authorized" :
-                                         "&nbsp"))
-                                        + '</td>';
-                        tableHtml += '<td>' + test_results[key].comments + '</td>';
-                        tableHtml += '</tr>';
+                $.ajax('/forms/public/students/authorize-promotion/' + term_Id, {
+                    success: function(data) {
+                        button.attr('class', 'btn-authorized');
+                        button.html = "Authorized";
                     }
-                    
-                    $('table#table-tests tbody').html(tableHtml);
-                    //ufTable('table-tests');
-                }
-                
-                function fixZ(num) {
-                    return num == 0 ? '' : num;
-                }
-                
-                function capitalizeFirstLetter(string) {
-                    string = string.toLowerCase();
-                    return string.charAt(0).toUpperCase() + string.slice(1);
-                }
+                });
             });
-        </script>
+            
+            $('table#table-tests').on('click', '.comment-btn', function() {
+                
+                var button = $(this);
+                var td = button.closest('td');
+                var term_Id = button.attr('id').substr(5,button.attr('id').length-5);
+                var comment = $('#cmmt_' + term_Id).val() + ' By ID ' + String.fromCharCode(35) + $('#user-name').html();
+                    
+                $.ajax('/forms/public/students/add-comment/' + term_Id + '_' + comment, {
+                    success: function(data) {
+                        td.html(comment + "<br>" + td.html());
+                    }
+                });
+            });
+            
+            $('.term-btn').on('click', function(){
+                var $this = $(this);
+                
+                $('.term-btn').css("background-color","#337ab7");
+                $this.css("background-color","green");
+                
+                var termId = $this.html();
+                $.ajax('/forms/public/students/get-post-test-form/' + termId, {
+                    success: function(data) {
+                        test_results = JSON.parse(data);
+                        $('.class-btn').first().click();
+                    }
+                });
+            });
+            
+            $('.class-btn').on('click', function() {
+                var $this = $(this);
+                
+                $('.class-btn').css("background-color","#337ab7");
+                $this.css("background-color","green");
+                
+                var classId = $this.html();
+                loadResutlsOfClass(classId);
+                return false;
+            });
+            
+            $('.term-btn').last().trigger( "click" );
+
+            function loadResutlsOfClass(classId) {
+                var tableHtml = '';
+                var indexArr = 0;
+                for (var key in test_results) {
+                    if (test_results[key].reference_number != classId && classId != "All Classes")
+                        continue;
+                    
+                    tableHtml += '<tr>';
+                    tableHtml += '<td>' + (++indexArr) + '</td>';
+                    tableHtml += '<td>' + test_results[key].reference_number + '</td>';
+                    tableHtml += '<td>' + capitalizeFirstLetter(test_results[key].last_name) + '</td>';
+                    tableHtml += '<td>' + capitalizeFirstLetter(test_results[key].first_name) + '</td>';
+                    tableHtml += '<td>' + test_results[key].student_id + '</td>';
+                    tableHtml += '<td>' + test_results[key].telephone + '</td>';
+                    tableHtml += '<td>' + test_results[key].nrs_level + '</td>';
+                    tableHtml += '<td>' + fixZ(test_results[key].pre_reading) + '</td>';
+                    tableHtml += '<td>' + fixZ(test_results[key].post_reading) + '</td>';
+                    tableHtml += '<td>' + test_results[key].prog_reading + '</td>';
+                    tableHtml += '<td>' + fixZ(test_results[key].pre_listening) + '</td>';
+                    tableHtml += '<td>' + fixZ(test_results[key].post_listening) + '</td>';
+                    tableHtml += '<td>' + test_results[key].prog_listening + '</td>';
+                    tableHtml += '<td>' + fixZ(test_results[key].tracking) + '</td>';
+                    tableHtml += '<td>' + test_results[key].lcp_earned + '</td>';
+                    tableHtml += '<td>' + test_results[key].lcp + '</td>';
+                    tableHtml += '<td>' + test_results[key].lcp_total + '</td>';
+                    tableHtml += '<td>' + test_results[key].next_level + '</td>';
+                    tableHtml += '<td>' + (test_results[key].auto_prom=="C" ? '<input type=checkbox checked>' : "&nbsp") + '</td>';
+                    tableHtml += "<td>" +
+                                    (test_results[key].admin_prom.charAt(0)=='C' ?
+                                     "<input type=checkbox  class=checkbox-square><button class='btn-authorize auth-btn' id=auth_" + (test_results[key].term) + "_" + test_results[key].student_id + "_" + $('#user-name').html() + ">Authorize</button>" :
+                                    (test_results[key].admin_prom.charAt(0)=='A' ?
+                                       "<input type=checkbox checked disabled class=checkbox-square><button class='btn-authorized'>Authorized" :
+                                     "&nbsp"))
+                                    + '</td>';
+                    tableHtml += '<td>' + test_results[key].flags + '</td>';
+                    tableHtml += "<td>" + test_results[key].comments + "<input type=text size=12 id=cmmt_"
+                        + (test_results[key].term) + "_" + test_results[key].student_id
+                        + "><button class='btn-authorize comment-btn' id=bcmt_"
+                        + (test_results[key].term) + "_" + test_results[key].student_id
+                        + ">Add Comment</button></td>";
+                    tableHtml += '</tr>';
+                }
+                
+                $('table#table-tests tbody').html(tableHtml);
+                //ufTable('table-tests');
+            }
+            
+            function fixZ(num) {
+                return num == 0 ? '' : num;
+            }
+            
+            function capitalizeFirstLetter(string) {
+                string = string.toLowerCase();
+                return string.charAt(0).toUpperCase() + string.slice(1);
+            }
+        });
+    </script>
 {% endblock %}
