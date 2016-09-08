@@ -87,7 +87,7 @@
                 }
                 
                 $('#div-std-data').show();
-                $.ajax('/forms/public/students/get-student-tracking/' + $('#txt-student').val(), {
+                $.ajax('/students/get-student-tracking/' + $('#txt-student').val(), {
                     success: function(data) {
                         student_tracking_info = JSON.parse(data);
                         if (student_tracking_info === null || student_tracking_info.length == 0){
@@ -155,7 +155,7 @@
         function convertDateFormat(strDate) {
             function pad(s) { return (s < 10) ? '0' + s : s; }
             var originalDate = new Date(strDate);
-            return (pad(originalDate.getMonth() + 1)) + '-' + pad(originalDate.getDate()) + '-' +  originalDate.getFullYear();
+            return (pad(originalDate.getMonth() + 1)) + '/' + pad(originalDate.getDate()) + '/' +  originalDate.getFullYear();
         }
     </script>
 {% endblock %}

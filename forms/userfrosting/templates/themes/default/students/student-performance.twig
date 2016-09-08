@@ -126,7 +126,7 @@
                     $.ajax('/forms/public/students/get-performance-by-class/' + selectedTerm + '_' + selectedClass, {
                         success: function(data) {
                             pfmData = JSON.parse(data);
-                            console.log(pfmData);
+                            console.log(data);
                             loadDataOfPfm(pfmData);
                         }
                     });
@@ -169,7 +169,7 @@
                                 alert ("Can not find the student.");
                                 return;
                             }
-                            console.log(pfmData);
+                            
                             loadDataOfPfm(pfmData);
                         }
                     });
@@ -228,13 +228,12 @@
             
             function loadDataOfPfm(pfmData) {
                 var tableHtml = "";
-                    
                 function getHtmlOfTracking(studentPfm ,tracking) {
                     if (studentPfm[tracking] != undefined) {
                         if (studentPfm[tracking]['pfm'].length == 0) return;
                         tableHtml += "<table id='table-performance'><thead><tr><th colspan=5>";
                         tableHtml += "<table style='width:700px'>";
-                        tableHtml += "<tr><td colspan=3>Student Name:" + studentPfm[tracking]['student_name'] + "</td><td>Student ID:" + student_id + "</td></tr>";
+                        tableHtml += "<tr><td colspan=3>Student Name:" + studentPfm[tracking]['student_name'] + "</td><td>Student ID:" + studentPfm[tracking]['student_id'] + "</td></tr>";
                         tableHtml += "<tr><td>Form: " + studentPfm[tracking]['form'] + "</td><td>Score:"
                                     + studentPfm[tracking]['score'] + "</td><td></td><td>Test Date:"
                                     + convertDateFormat(studentPfm[tracking]['test_date']) + "</td></tr>";
@@ -258,8 +257,8 @@
                     }
                 }
                 
-                for (var student_id in pfmData) {
-                    var studentPfm = pfmData[student_id];
+                for (var indexArr in pfmData) {
+                    var studentPfm = pfmData[indexArr];
                     getHtmlOfTracking(studentPfm, 'R');
                     getHtmlOfTracking(studentPfm, 'L');
                 }
@@ -270,7 +269,7 @@
             function convertDateFormat(strDate) {
                 function pad(s) { return (s < 10) ? '0' + s : s; }
                 var originalDate = new Date(strDate);
-                return (pad(originalDate.getMonth() + 1)) + '-' + pad(originalDate.getDate()) + '-' +  originalDate.getFullYear();
+                return (pad(originalDate.getMonth() + 1)) + '/' + pad(originalDate.getDate()) + '/' +  originalDate.getFullYear();
             }
         </script>
 {% endblock %}

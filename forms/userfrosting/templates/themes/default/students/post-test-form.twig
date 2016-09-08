@@ -100,7 +100,7 @@
                 var button = $(this);
                 var term_Id = button.attr('id').substr(5,button.attr('id').length-5);
                     
-                $.ajax('/forms/public/students/authorize-promotion/' + term_Id, {
+                $.ajax('/students/authorize-promotion/' + term_Id, {
                     success: function(data) {
                         button.attr('class', 'btn-authorized');
                         button.html = "Authorized";
@@ -115,7 +115,7 @@
                 var term_Id = button.attr('id').substr(5,button.attr('id').length-5);
                 var comment = $('#cmmt_' + term_Id).val() + ' By ID ' + String.fromCharCode(35) + $('#user-name').html();
                     
-                $.ajax('/forms/public/students/add-comment/' + term_Id + '_' + comment, {
+                $.ajax('/students/add-comment/' + term_Id + '_' + comment, {
                     success: function(data) {
                         td.html(comment + "<br>" + td.html());
                     }
@@ -129,7 +129,7 @@
                 $this.css("background-color","green");
                 
                 var termId = $this.html();
-                $.ajax('/forms/public/students/get-post-test-form/' + termId, {
+                $.ajax('/students/get-post-test-form/' + termId, {
                     success: function(data) {
                         test_results = JSON.parse(data);
                         $('.class-btn').first().click();

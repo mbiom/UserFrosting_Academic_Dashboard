@@ -107,7 +107,7 @@
                     $this.css("background-color","green");
                     
                     selectedClassRef = $this.html();
-                    $.ajax('/forms/public/students/get-excessive-absences/' + selectedTerm + '_' + selectedClassRef, {
+                    $.ajax('/students/get-excessive-absences/' + selectedTerm + '_' + selectedClassRef, {
                         success: function(data) {
                             student_absences = JSON.parse(data);
                             console.log(student_absences);
@@ -167,7 +167,7 @@
                     }
                     checked_students.push(new Array(selectedTerm, selectedClassRef, $('#user-name').html()));
                     
-                    $.ajax('/forms/public/students/set-excessive-absences/' + arrayToString(checked_students) , {
+                    $.ajax('/students/set-excessive-absences/' + arrayToString(checked_students) , {
                         success: function(data) {
                             alert ("Successfully submitted.");
                         }

@@ -63,6 +63,7 @@ class StudentPerformanceController extends \UserFrosting\BaseController {
     }
     
     public function getPerformanceByClass($classId) {
+        
         $arr_param = explode('_', $classId);
         $term = $arr_param[0];
         $classId = $arr_param[1];
@@ -75,13 +76,15 @@ class StudentPerformanceController extends \UserFrosting\BaseController {
             ->get(array('student_id'));
         
         $pfm_data = array();
+        $indexOf = 0;
         foreach($students as $student) {
-            $pfm_data[$student['student_id']] = array();
+            $std_pfm_data = array();
         
             $reading_pfms = $this->getRLPerformanceOfStudent($student['student_id'], true, $term);
             $listening_pfms = $this->getRLPerformanceOfStudent($student['student_id'], false, $term);
-            if (count($reading_pfms) > 0) $pfm_data[$student['student_id']]['R'] = $reading_pfms;
-            if (count($listening_pfms) > 0) $pfm_data[$student['student_id']]['L'] = $listening_pfms;
+            if (count($reading_pfms) > 0) $std_pfm_data['R'] = $reading_pfms;
+            if (count($listening_pfms) > 0) $std_pfm_data['L'] = $listening_pfms;
+            array_push($pfm_data, $std_pfm_data);
         }
         
         return json_encode($pfm_data);
@@ -147,7 +150,7 @@ class StudentPerformanceController extends \UserFrosting\BaseController {
                 ->get();
                 
             if(count($accurate) > 0 && $accurate[0]['accurate']=='Yes') {
-                
+                $pfm_data['student_id'] = $pfms[0]['student_id'];
                 $pfm_data['student_name'] = $pfms[0]['student_name'];
                 $pfm_data['form'] = $pfms[0]['form'];
                 $pfm_data['score'] = $pfms[0]['scale_score'];
@@ -193,25 +196,4 @@ class StudentPerformanceController extends \UserFrosting\BaseController {
         
         return $pfm_data;
     }
-    
-    public function getRLPerformanceForCompetency($compNo, $isReading, $term, $success=-1) {
-        $positions = StudentPerformance::queryBuilder()
-            ->where('term', '=', $term)
-            ->where('student_id', '=', $student_id)
-            ->where('form', 'regexp', $isReading ? 'R':'L')
-            ->orderBy('position', 'asc')
-            ->orderBy('main_comp', 'desc')
-            ->get();
-    }
-    
-    public function getStudentsOfClass($classid) {
-        
-        $students = StudentsBio::queryBuilder()
-            ->leftJoin('uf_student_performance as stp', 'stp.student_id', '=', 'uf_students_bio.student_id')
-            ->where('reference_number', '=', $classid)
-            ->get();
-        
-        return json_encode($students);
-    }
-    
 }

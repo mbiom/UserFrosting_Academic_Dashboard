@@ -32,7 +32,7 @@
             $(document).ready(function() {
                 $('.update-btn').on('click', function(){
                     $('.panel-alert').html('Updating now... Please wait a few minutes.');
-                    $.ajax('/forms/public/students/update-test-form-table', {
+                    $.ajax('/students/update-test-form-table', {
                         success: function(data) {
                             updateResult = JSON.parse(data);
                             console.log(updateResult);

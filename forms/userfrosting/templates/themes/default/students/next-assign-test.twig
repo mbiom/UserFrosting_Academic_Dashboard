@@ -108,7 +108,7 @@
                 $('#div-selected-class').html($this.html());
                 
                 var selectedClassRef = $this.html();
-                $.ajax('/forms/public/students/get-next-assign-test/' + selectedTerm + '_' + selectedClassRef, {
+                $.ajax('/students/get-next-assign-test/' + selectedTerm + '_' + selectedClassRef, {
                     success: function(data) {
                         var natData = JSON.parse(data);
                         console.log(natData);
@@ -155,7 +155,7 @@
         function convertDateFormat(strDate) {
             function pad(s) { return (s < 10) ? '0' + s : s; }
             var originalDate = new Date(strDate);
-            return (pad(originalDate.getMonth() + 1)) + '-' + pad(originalDate.getDate()) + '-' +  originalDate.getFullYear();
+            return (pad(originalDate.getMonth() + 1)) + '/' + pad(originalDate.getDate()) + '/' +  originalDate.getFullYear();
         }
     </script>
 {% endblock %}
