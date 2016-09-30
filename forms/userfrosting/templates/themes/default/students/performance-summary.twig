@@ -1,0 +1,243 @@
+{% extends "layouts/layout-dashboard.twig" %}
+{% set page_group = "students" %}
+
+{# Set page properties (page.*) here. #}
+{% block page %}
+    {# By putting this in a special block, we ensure that it will be set AFTER the default values are set in the parent template, 
+    but BEFORE the page itself is rendered. #}    
+    {% set page = page | merge({
+        "title"       : "Student Performance",
+        "description" : "Student Performance, authorization rules, add/remove groups, etc."
+    }) %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content %}
+    <div class='panel panel-primary'>
+    <div class='panel-heading'>
+        <h3 class='panel-title'><i class='fa fa-users'></i>Class Performance Summary</h3>
+    </div>
+    
+    <div class='panel-body'>
+        <div class="well well-sm"><strong>Select Term</strong></div>
+            <table width=30%>
+                <tr>
+                {% for term in terms %}
+                    <td><button class="btn-selector term-btn" href="#">{{term.term}}</button></td>
+                {% endfor %}
+                </tr>
+            </table>
+        <div class="well well-sm"><strong>Select Class</strong>
+        </div>
+        {% if (user.primary_group_id==4 or user.primary_group_id==2) %}
+            <div style="overflow-x: auto">
+                <table id='table-classes'>
+                {% for class in allclasses %}
+                    {% if loop.index % 10 == 1 %}
+                        <tr>
+                    {% endif %}
+                    <td><button class="btn-selector class-btn" href="#">{{class.reference_number}}</button></td>
+                    {% if loop.index % 10 == 0 %}
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+                </table>
+            </div>
+        {% else %}
+            <table class='table-responsive' id='table-classes'><tr>
+                {% for teacher_id,class in classreference %}
+                    {% if teacher_id==user.user_name %}
+                        {% for classref in class %}
+                            <td><button class="btn-selector class-btn" href="#">{{classref}}</button></td>
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+            </tr></table>
+        {% endif %}
+        <hr>
+        <div class="well well-sm"><strong>Select Form: <span id="div-selected-form" /></strong></div>
+        <div id="sel-forms" style="display: none" />
+    </div>
+    <div class="row">
+        <div class="col-sm-6" id="panel-pfm">
+            <table class='table-performance' id='form-pfm-table'>
+                <thead>
+                    <tr>
+                        <th>Position</th>
+                        <th>Correct?</th>
+                        <th>Comp No.</th>
+                        <th>Task</th>
+                        <th>Competency Description</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="col-sm-6" id="panel-detail">
+            <table class='table-performance' id='detail-pfm-table' style='width:500px'>
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Student Id</th>
+                        <th><p>Correct</p>
+                            <label class='label-for-checkbox'>Y <input type='checkbox' class='checkbox-square' id='chk-yes'></input></label>
+                            <label class='label-for-checkbox'>N <input type='checkbox' class='checkbox-square' id='chk-no'></input></label>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block page_scripts %}
+        <script>            
+            $(document).ready(function() {
+                var selectedTerm;
+                var selectedClass = "";
+                var selectedForm = "";
+                var pfmData = new Array();
+                var detailPfmData = new Array();
+                
+                $('.table-performance').hide();
+
+                $('.term-btn').on('click', function(){
+                    var $this = $(this);
+                    
+                    $('.term-btn').css("background-color","#337ab7");
+                    $this.css("background-color","green");
+                    $('.table-performance').hide();
+                    
+                    selectedTerm = $this.html();
+                });
+
+                $('.term-btn').last().trigger( "click" );
+                
+                //button select class
+                $('.class-btn').on('click', function() {
+                    var $this = $(this);
+                    
+                    $('.class-btn').css("background-color","#337ab7");
+                    $this.css("background-color","green");
+                    
+                    $('#div-selected-class').html($this.html());
+                    selectedClass = $this.html();
+                    $('.table-performance').hide();
+
+                    $.ajax('/forms/public/students/get-forms-by-class/' + selectedTerm + '_' + selectedClass, {
+                        success: function(data) {
+                            formsData = JSON.parse(data);
+
+                            $('#sel-forms').show();
+                            var tableHtml = "<table><tr>";
+                            for (var i = 0; i < formsData.length; i++) {
+                                tableHtml += "<td><button class='btn-selector form-btn'>" + formsData[i] + "</button></td>";
+                            }
+                            tableHtml += "</tr></table>";
+                            $('#sel-forms').html(tableHtml);
+                        }
+                    });
+                    return false;
+                });
+
+                //select form button
+                $(document).on('click', '.form-btn', function() {
+                    var $this = $(this);
+                    
+                    $('.form-btn').css("background-color","#337ab7");
+                    $this.css("background-color","green");
+                    
+                    $('#form-pfm-table').show();
+                    // $('#div-selected-class').html($this.html());
+                    selectedForm = $this.html();
+
+                    $.ajax('/forms/public/students/get-performance-by-form/' + selectedTerm + '_' + selectedClass + '_' + selectedForm, {
+                        success: function(data) {
+                            pfmData = JSON.parse(data);
+                            drawFormPFMData(pfmData);
+                        }
+                    });
+                    return false;
+                });
+
+                $(document).on('click', '#form-pfm-table tbody tr', function(){
+                    $(this).addClass('selected').siblings().removeClass("selected");
+                    var offsetTop = $(this).offset().top - $('#panel-pfm').offset().top;
+
+                    $('#panel-detail').css('margin-top', offsetTop+'px');
+                    $('#detail-pfm-table').show();
+
+                    $('#chk-yes').prop('checked', false);
+                    $('#chk-no').prop('checked', false);
+
+                    $.ajax('/forms/public/students/get-detail-by-comp/' + selectedTerm + '_' + selectedClass + '_' + selectedForm + '_'
+                     + pfmData[$(this).index()]['position'] + '_' + pfmData[$(this).index()]['comp_number'], {
+                        success: function(data) {
+                            detailPfmData = JSON.parse(data);
+                            drawDetailPFMData(detailPfmData, '');
+                        }
+                    });
+                    return false;
+                });
+
+                //checkbutton YES click
+                $('#chk-yes').on('click', function(){
+                    if ($(this).is(':checked')){
+                        $('#chk-no').prop('checked', false);
+                        drawDetailPFMData(detailPfmData, 'Y');
+                    }
+                    else {
+                        drawDetailPFMData(detailPfmData, '');
+                    }
+                });
+                
+                //checkbutton NO click
+                $('#chk-no').on('click', function(){
+                    if ($(this).is(':checked')){
+                        $('#chk-yes').prop('checked', false);
+                        drawDetailPFMData(detailPfmData, 'N');
+                    }
+                    else {
+                        drawDetailPFMData(detailPfmData, '');
+                    }
+                });
+            });
+            
+            function drawFormPFMData(pfmData) {
+                
+                var tableHtml = "";
+                for(var key in pfmData) {
+                    var pfmRow = pfmData[key];
+                    tableHtml += pfmRow['main_comp'] == 'Yes' ? "<tr class='main-comp'>" : "<tr>";
+                    tableHtml += "<td>" + (pfmRow['main_comp'] == 'Yes' ? pfmRow['position'] : "") + "</td>";
+                    tableHtml += "<td>" + Math.round(Number(pfmRow['pro']) * 100) + "%</td>";
+                    tableHtml += "<td>" + pfmRow['comp_number'] + "</td>";
+                    tableHtml += "<td>" + (pfmRow['task']==0 ? "" : pfmRow['task']) + "</td>";
+                    tableHtml += "<td>" + pfmRow['comp_description'] + "</td>";
+                    tableHtml += "</tr>";
+                }
+                $("#panel-pfm tbody").html(tableHtml);
+            }
+
+            function drawDetailPFMData(pfmData, correct) {
+                
+                var tableHtml = "";
+                for(var key in pfmData) {
+                    var pfmRow = pfmData[key];
+                    if ((correct == 'Y' && pfmRow['correct'] == "No") ||
+                        (correct == 'N' && pfmRow['correct'] == "Yes"))
+                        continue;
+                    tableHtml += "<tr>";
+                    tableHtml += "<td>" + pfmRow['student_name'] + "</td>";
+                    tableHtml += "<td>" + pfmRow['student_id'] + "</td>";
+                    tableHtml += "<td>" + pfmRow['correct'] + "</td>";
+                    tableHtml += "</tr>";
+                }
+                $("#panel-detail tbody").html(tableHtml);
+            }
+
+        </script>
+{% endblock %}
+

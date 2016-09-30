@@ -35,4 +35,19 @@ class StudentPerformance extends UFModel {
     public function __construct($properties = []) {
         parent::__construct($properties);
     }
+
+    public function getPerformanceByForm($term, $classId, $formId) {
+        $sql= "select A.*, sum(A.correct='Yes')/count(A.student_id) 
+                from uf_student_performance as A left 
+                join uf_students_bio as B on A.student_id=B.student_id 
+                where A.term=". $term ." and A.form=" . $formId ." and B.reference_number=". $classId ." 
+                group by position, comp_number 
+                order by position, main_comp desc";
+        $sql = "select * from uf_student_performance";
+
+        $db = Capsule::connection();
+        var_dump($db);
+        $result = $db -> raw($sql);
+        return $result;
+    }
 }

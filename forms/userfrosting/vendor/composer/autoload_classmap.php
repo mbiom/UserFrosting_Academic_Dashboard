@@ -45,6 +45,7 @@ return array(
     'UserFrosting\\GroupController' => $baseDir . '/controllers/GroupController.php',
     'UserFrosting\\GroupLoader' => $baseDir . '/models/database/GroupLoader.php',
     'UserFrosting\\StudentPerformanceController' => $baseDir . '/controllers/StudentPerformanceController.php',
+    'UserFrosting\\PerformanceSummaryController' => $baseDir . '/controllers/PerformanceSummaryController.php',
     'UserFrosting\\PostTestFormController' => $baseDir . '/controllers/PostTestFormController.php',
     'UserFrosting\\ExcessiveAbsencesController' => $baseDir . '/controllers/ExcessiveAbsencesController.php',
     'UserFrosting\\StudentTrackingController' => $baseDir . '/controllers/StudentTrackingController.php',

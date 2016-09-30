@@ -56,6 +56,11 @@
                     <a href="{{site.uri.public}}/students/student-performance"><i class="fa fa-tags fa-fw"></i> {{ translate("MENU_STUDENT_PERFORMANCE") }}</a>
                 </li>
                 {% endif %}
+                {% if checkAccess('uri_student_performance') %}
+                <li>
+                    <a href="{{site.uri.public}}/students/performance-summary"><i class="fa fa-tags fa-fw"></i> {{ translate("MENU_PERFORMANCE_SUMMARY") }}</a>
+                </li>
+                {% endif %}
                 {% if checkAccess('uri_next_assign_test') %}
                 <li>
                     <a href="{{site.uri.public}}/students/next-assign-test"><i class="fa fa-tags fa-fw"></i> {{ translate("MENU_NAT") }}</a>

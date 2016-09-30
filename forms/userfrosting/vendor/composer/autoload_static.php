@@ -176,6 +176,7 @@ class ComposerStaticInitc52ebfbf30fadb1cecddae09d70e0ca9
         'UserFrosting\\GroupController' => __DIR__ . '/../..' . '/controllers/GroupController.php',
         'UserFrosting\\GroupLoader' => __DIR__ . '/../..' . '/models/database/GroupLoader.php',
         'UserFrosting\\StudentPerformanceController' => __DIR__ . '/../..' . '/controllers/StudentPerformanceController.php',
+        'UserFrosting\\PerformanceSummaryController' => __DIR__ . '/../..' . '/controllers/PerformanceSummaryController.php',
         'UserFrosting\\PostTestFormController' => __DIR__ . '/../..' . '/controllers/PostTestFormController.php',
         'UserFrosting\\ExcessiveAbsencesController' => __DIR__ . '/../..' . '/controllers/ExcessiveAbsencesController.php',
         'UserFrosting\\StudentTrackingController' => __DIR__ . '/../..' . '/controllers/StudentTrackingController.php',

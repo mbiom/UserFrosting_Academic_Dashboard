@@ -276,6 +276,26 @@
         echo $controller->getPerformanceByCompetency($compid);
     });
     
+    $app->get('/students/performance-summary/?', function () use ($app) {
+        $controller = new UF\PerformanceSummaryController($app);
+        return $controller->pagePerformanceSummary();
+    });
+
+    $app->get('/students/get-forms-by-class/:classid', function($classid) use ($app) {
+        $controller = new UF\PerformanceSummaryController($app);
+        echo $controller->getFormsByClass($classid);
+    });
+
+    $app->get('/students/get-performance-by-form/:formid', function($formid) use ($app) {
+        $controller = new UF\PerformanceSummaryController($app);
+        echo $controller->getPerformanceByForm($formid);
+    });
+
+    $app->get('/students/get-detail-by-comp/:formid', function($formid) use ($app) {
+        $controller = new UF\PerformanceSummaryController($app);
+        echo $controller->getDetailByComp($formid);
+    });
+
     $app->get('/students/post-test-form/?', function () use ($app) {
         $controller = new UF\PostTestFormController($app);
         return $controller->pagePostTestForm();

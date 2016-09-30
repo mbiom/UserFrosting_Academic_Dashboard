@@ -231,7 +231,7 @@
                 function getHtmlOfTracking(studentPfm ,tracking) {
                     if (studentPfm[tracking] != undefined) {
                         if (studentPfm[tracking]['pfm'].length == 0) return;
-                        tableHtml += "<table id='table-performance'><thead><tr><th colspan=5>";
+                        tableHtml += "<table class='table-performance'><thead><tr><th colspan=5>";
                         tableHtml += "<table style='width:700px'>";
                         tableHtml += "<tr><td colspan=3>Student Name:" + studentPfm[tracking]['student_name'] + "</td><td>Student ID:" + studentPfm[tracking]['student_id'] + "</td></tr>";
                         tableHtml += "<tr><td>Form: " + studentPfm[tracking]['form'] + "</td><td>Score:"
