@@ -107,7 +107,7 @@
                     $this.css("background-color","green");
                     
                     selectedClassRef = $this.html();
-                    $.ajax('/students/get-excessive-absences/' + selectedTerm + '_' + selectedClassRef, {
+                    $.ajax('/forms/public/students/get-excessive-absences/' + selectedTerm + '_' + selectedClassRef, {
                         success: function(data) {
                             student_absences = JSON.parse(data);
                             console.log(student_absences);
@@ -126,12 +126,10 @@
                         tableHtml += '<tr>';
                         tableHtml += '<td>' + (++indexArr) + '</td>';
                         tableHtml += '<td><input type=checkbox class=absence-check id=check_'
-                             + student_absences[key].student_id +
-                            (parseInt(student_absences[key].checked)==0 ? ">" : " checked>") + '</td>';
+                             + student_absences[key].student_id + '></td>';
                         tableHtml += '<td>' + capitalizeFirstLetter(student_absences[key].last_name) + ", " + capitalizeFirstLetter(student_absences[key].first_name) + '</td>';
                         tableHtml += '<td><input type=text class=absence-num id=text_'
-                            + student_absences[key].student_id
-                            + ' value=' + (parseInt(student_absences[key].absences) > 0 ? student_absences[key].absences : "") + '></td>';
+                            + student_absences[key].student_id + '></td>';
                         tableHtml += '<td></td>';
                         tableHtml += '</tr>';
                     }
@@ -145,18 +143,21 @@
                     
                     var checked_students = new Array();
                     
+                    $('input.absence-num').css({
+                        "border": "",
+                        "background":""
+                    });
                     for (var key in student_absences)
                     {
                         var abs_check = $('#check_' + student_absences[key].student_id);
                         var abs_num_text = $('#text_' + student_absences[key].student_id);
                         
                         if (abs_check.is(':checked')){
-                            if (!isNormalInteger(abs_num_text.val())) {
-                                alert ("Please input absences number correctly.");
-                                return;
-                            }
-                            else if (parseInt(abs_num_text.val() == 0)) {
-                                alert ("Please input absences number correctly.");
+                            if ($.trim(abs_num_text.val()) == '' || !isNormalInteger(abs_num_text.val())) {
+                                abs_num_text.css ({
+                                    "border": "1px solid red",
+                                    "background": "#FFCECE"
+                                });
                                 return;
                             }
                         }
@@ -167,9 +168,11 @@
                     }
                     checked_students.push(new Array(selectedTerm, selectedClassRef, $('#user-name').html()));
                     
-                    $.ajax('/students/set-excessive-absences/' + arrayToString(checked_students) , {
+                    $.ajax('/forms/public/students/set-excessive-absences/' + arrayToString(checked_students) , {
                         success: function(data) {
                             alert ("Successfully submitted.");
+                            $('input.absence-num').val('');
+                            $('input.absence-check').prop('checked', false);
                         }
                     });
                     

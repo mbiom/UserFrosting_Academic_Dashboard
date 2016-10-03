@@ -105,7 +105,7 @@ class PerformanceSummaryController extends \UserFrosting\BaseController {
             ->groupBy('comp_number')
             ->orderBy('position', 'asc')             
             ->orderBy('main_comp', 'desc')
-            ->selectRaw("uf_student_performance.*, sum(uf_student_performance.correct='Yes')/count(uf_student_performance.student_id) as pro")
+            ->selectRaw("uf_student_performance.*, sum(uf_student_performance.correct='Yes')/count(uf_student_performance.student_id) as pro, count(uf_student_performance.student_id) as student_count")
             ->get();
             // ->get(array('uf_student_performance.position', StudentPerformance::raw("sum(uf_student_performance.correct='Yes')/count(uf_student_performance.student_id)"), 'uf_student_performance.comp_number', 'uf_student_performance.task', 'uf_student_performance.comp_description'));
         return json_encode($pfms);
@@ -134,6 +134,7 @@ class PerformanceSummaryController extends \UserFrosting\BaseController {
             ->where('uf_student_performance.form', '=', $formId)
             ->where('uf_student_performance.position', '=', $posId)
             ->where('uf_student_performance.comp_number', '=', $compId)
+            ->orderBy('student_name')
             ->get(array('uf_student_performance.student_id', 'uf_student_performance.student_name', 'uf_student_performance.correct'));
         return json_encode($pfms);
     }

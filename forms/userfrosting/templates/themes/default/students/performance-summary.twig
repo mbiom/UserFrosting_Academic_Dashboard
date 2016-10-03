@@ -15,7 +15,7 @@
 {% block content %}
     <div class='panel panel-primary'>
     <div class='panel-heading'>
-        <h3 class='panel-title'><i class='fa fa-users'></i>Class Performance Summary</h3>
+        <h3 class='panel-title'><i class='fa fa-users'></i>Class Performance</h3>
     </div>
     
     <div class='panel-body'>
@@ -63,6 +63,11 @@
             <table class='table-performance' id='form-pfm-table'>
                 <thead>
                     <tr>
+                        <th colspan=2 id='th-reference'>Reference</th>
+                        <th colspan=2 id='th-form'>From</th>
+                        <th id='th-students'>Total Students</th>
+                    </tr>
+                    <tr>
                         <th>Position</th>
                         <th>Correct?</th>
                         <th>Comp No.</th>
@@ -79,7 +84,8 @@
                     <tr>
                         <th>Student Name</th>
                         <th>Student Id</th>
-                        <th><p>Correct</p>
+                        <th style='position:relative'>
+                            <p>Correct<input type='button' id='btn-close-table' style='position:absolute;right:0px;top:0px;color:black' value='Close' /></p>
                             <label class='label-for-checkbox'>Y <input type='checkbox' class='checkbox-square' id='chk-yes'></input></label>
                             <label class='label-for-checkbox'>N <input type='checkbox' class='checkbox-square' id='chk-no'></input></label>
                         </th>
@@ -156,6 +162,9 @@
                     $.ajax('/forms/public/students/get-performance-by-form/' + selectedTerm + '_' + selectedClass + '_' + selectedForm, {
                         success: function(data) {
                             pfmData = JSON.parse(data);
+                            $('#th-reference').html("Reference: " + selectedClass);
+                            $('#th-form').html("Form: " + selectedForm);
+                            $('#th-students').html("Total Students: " + pfmData[0]['student_count']);
                             drawFormPFMData(pfmData);
                         }
                     });
@@ -202,6 +211,10 @@
                     else {
                         drawDetailPFMData(detailPfmData, '');
                     }
+                });
+
+                $('#btn-close-table').on('click', function(){
+                    $('#detail-pfm-table').hide();
                 });
             });
             

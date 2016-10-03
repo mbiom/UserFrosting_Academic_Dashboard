@@ -123,7 +123,7 @@
                     $('#txt-student').val("");
                     $('#txt-competency').val("");
                     $("#panel-pfm").html("<p style='padding-right:100px; color:red; font-weight:bold;'>Loading data. Please wait a minute...</p>");
-                    $.ajax('/forms/public/students/get-performance-by-class/' + selectedTerm + '_' + selectedClass, {
+                    $.ajax('/students/get-performance-by-class/' + selectedTerm + '_' + selectedClass, {
                         success: function(data) {
                             pfmData = JSON.parse(data);
                             console.log(data);
@@ -140,7 +140,7 @@
                     }
                     $('#txt-student').val("");
                     $("#panel-pfm").html("<p style='padding-right:100px; color:red; font-weight:bold;'>Loading data. Please wait a minute...</p>");
-                    $.ajax('/forms/public/students/get-performance-by-competency/' + selectedClass + '_' + $('#txt-competency').val() + '_' + selectedTerm, {
+                    $.ajax('/students/get-performance-by-competency/' + selectedClass + '_' + $('#txt-competency').val() + '_' + selectedTerm, {
                         success: function(data) {
                             pfmData = JSON.parse(data);
                             if (pfmData === null || pfmData.length == 0){
@@ -162,7 +162,7 @@
                     }
                     $('#txt-competency').val("");
                     $("#panel-pfm").html("<p style='padding-right:100px; color:red; font-weight:bold;'>Loading data. Please wait a minute...</p>");
-                    $.ajax('/forms/public/students/get-performance-by-student/' + $('#txt-student').val() + '_' + selectedTerm, {
+                    $.ajax('/students/get-performance-by-student/' + $('#txt-student').val() + '_' + selectedTerm, {
                         success: function(data) {
                             pfmData = JSON.parse(data);
                             if (pfmData === null || pfmData.length == 0){
