@@ -61,7 +61,7 @@
             <table id="table-nat" class="tablesorter table table-bordered table-hover table-striped tablesorter-bootstrap">
                 <thead>
                     <tr>
-                        <th colspan=2 rowspan=2>Student</th>
+                        <th colspan=2 rowspan=2 id='sort-by-student'>Student(Sort)</th>
                         <th colspan=6>Last Test</th>
                         <th colspan=2>Next Assigned Test</th>
                     </tr>
@@ -69,10 +69,10 @@
                         <th>Class Administered</th>
                         <th>Date</th>
                         <th>Form</th>
-                        <th>Level</th>
+                        <th id='sort-by-level'>Level(Sort)</th>
                         <th>Raw Score</th>
                         <th>Scale Score</th>
-                        <th>Form</th>
+                        <th id='sort-by-form'>Form(Sort)</th>
                         <th>Test Series</th>
                     </tr>
                 </thead>
@@ -88,6 +88,7 @@
         $(document).ready(function() {
             var selectedTerm;
             var selectedClassRef;
+            var natData;
                 
             $('.term-btn').on('click', function(){
                 var $this = $(this);
@@ -108,25 +109,72 @@
                 $('#div-selected-class').html($this.html());
                 
                 var selectedClassRef = $this.html();
-                $.ajax('/students/get-next-assign-test/' + selectedTerm + '_' + selectedClassRef, {
+                $.ajax('/forms/public/students/get-next-assign-test/' + selectedTerm + '_' + selectedClassRef, {
                     success: function(data) {
-                        var natData = JSON.parse(data);
-                        console.log(natData);
-                        loadDataOfClass(natData);
+                        natData = JSON.parse(data);
+                        loadDataOfClass(natData, true);
                     }
                 });
                 
                 return false;
             });
+            
+            $('#sort-by-student').on('click', function() {
+                natData.sort(function(a, b){
+                    if(a.student_name < b.student_name) return -1;
+                    if(a.student_name > b.student_name) return 1;
+                    return 0;
+                });
+
+                loadDataOfClass(natData, true);
+            });
+
+            $('#sort-by-level').on('click', function() {
+                var natDataSortedByLevel = new Array();
+                natDataSortedByLevel = natData;
+                natDataSortedByLevel.sort(function(a, b){
+                    if(a.level < b.level) return -1;
+                    if(a.level > b.level) return 1;
+                    return 0;
+                });
+
+                loadDataOfClass(natDataSortedByLevel, false);
+            });
+
+            $('#sort-by-form').on('click', function() {
+                var natDataSortedByForm = new Array();
+                natDataSortedByForm = natData;
+                natDataSortedByForm.sort(function(a, b){
+                    // if(a.form < b.form) return -1;
+                    // if(a.form > b.form) return 1;
+                    // return 0;
+                    var ax = [], bx = [];
+
+                    a.form.replace(/(\d+)|(\D+)/g, function(_, $1, $2) { ax.push([$1 || Infinity, $2 || ""]) });
+                    b.form.replace(/(\d+)|(\D+)/g, function(_, $1, $2) { bx.push([$1 || Infinity, $2 || ""]) });
+                    
+                    while(ax.length && bx.length) {
+                        var an = ax.shift();
+                        var bn = bx.shift();
+                        var nn = (an[0] - bn[0]) || an[1].localeCompare(bn[1]);
+                        if(nn) return nn;
+                    }
+
+                    return ax.length - bx.length;
+                });
+
+                loadDataOfClass(natDataSortedByForm, false);
+            });
         });
         
-        function loadDataOfClass(natData) {
+
+        function loadDataOfClass(natData, abbr) {
             var tableHtml = '';
             var lastId = '';
             for (var key in natData)
             {
                 tableHtml += '<tr>';
-                if (lastId == natData[key]['student_id'])
+                if (lastId == natData[key]['student_id'] && abbr)
                 {
                     tableHtml += '<td></td><td></td>';
                 }

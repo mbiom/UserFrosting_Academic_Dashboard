@@ -1,7 +1,5 @@
 <?php
-
 namespace UserFrosting;
-
 /**
  * PostTestFormController Class
  *
@@ -12,7 +10,6 @@ namespace UserFrosting;
  * @link http://www.userfrosting.com/navigating/#structure
  */
 class ExcessiveAbsencesController extends \UserFrosting\BaseController {
-
     /**
      * Create a new PostTestFormController object.
      *
@@ -22,7 +19,6 @@ class ExcessiveAbsencesController extends \UserFrosting\BaseController {
     public function __construct($app){
         $this->_app = $app;
     }
-
     /**
      * Renders the PostTestForm listing page.
      *
@@ -72,20 +68,12 @@ class ExcessiveAbsencesController extends \UserFrosting\BaseController {
         $students = array();
         
         $students = StudentsBio::queryBuilder()
-            ->leftJoin('uf_excessive_absences as ea', 'ea.student_id', '=', 'uf_students_bio.student_id', 'and', 'ea.term', '=', 'uf_students_bio.term')
+            ->where('term', '=', $term)
             ->where('reference_number', '=', $classRef)
-            ->where('uf_students_bio.term', '=', $term)
-            ->orderBy('last_name')
-            ->get(array('uf_students_bio.*', 'ea.absences', 'ea.checked'));
-        
-        foreach ($students as $key => $student) {
-            if (is_null($student['checked'])) {
-                $students[$key]['checked'] = 0;
-            }
-            if (is_null($student['absences'])) {
-                $students[$key]['absences'] = 0;
-            }
-        }
+            ->where('status_code', '<>', 'W')
+            ->where('status_code', '<>', 'WX')
+            ->groupBy('student_id')
+            ->get(array('student_id', 'last_name', 'first_name'));
         return json_encode($students);
     }
     
@@ -103,7 +91,7 @@ class ExcessiveAbsencesController extends \UserFrosting\BaseController {
             $temp_arr1 = explode('_', $temp_line);
             array_push($student_absences, $temp_arr1);
         }
-        //return json_encode($student_absences);
+        // return json_encode($student_absences);
         //$student_absences = json_decode($data);
         if (count($student_absences) == 0)
             return "F";
@@ -143,7 +131,6 @@ class ExcessiveAbsencesController extends \UserFrosting\BaseController {
         
         $to = $headerRecipients;
         //$to = "yurikonev@hotmail.com";
-
         $subject = 'Student Absences Report';
         
         $headers = "From: nobody@opinadero.com \r\n";
