@@ -189,5 +189,4 @@ class BaseController {
                                  array("HI", 211, 220, 210, 218, "E"),
                                  array("ADV", 221, 235, 219, 227, "F"),
                                  array("CCR", 236, 1000, 228, 1000, ""),);
-	public $LASTTERM = "20153";
 }

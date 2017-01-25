@@ -24,6 +24,14 @@
                 </p>
             </div>
         </div>
+        <div class='panel panel-primary'>
+            <div class='panel-body'>
+                <a class="btn btn-primary remove-btn" href="#">Remove Editions</a>
+                <p class="panel-alert1" style="color: red; margin-top: 30px">
+                    Click button to remove all students data in edition.
+                </p>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -32,13 +40,29 @@
             $(document).ready(function() {
                 $('.update-btn').on('click', function(){
                     $('.panel-alert').html('Updating now... Please wait a few minutes.');
-                    $.ajax('/students/update-test-form-table', {
+                    $.ajax('/forms/public/students/update-test-form-table', {
                         success: function(data) {
                             updateResult = JSON.parse(data);
-                            console.log(updateResult);
+                            console.log(data);
                             $('.panel-alert').html('Successfully updated.');
                         }
                     });
+                });
+
+                $('.remove-btn').on('click', function(){
+                    if (confirm("Are you sure to remove?")) {
+                        if (confirm("Are you sure to remove?")) {
+                            if (confirm("Are you sure to remove?")) {
+                                $('.panel-alert1').html('Removing now... Please wait a few minutes.');
+                                $.ajax('/forms/public/students/remove-edition-table', {
+                                    success: function(data) {
+                                        updateResult = JSON.parse(data);
+                                        $('.panel-alert1').html('Successfully removed.');
+                                    }
+                                });
+                            }
+                        }
+                    }
                 });
             });
         </script>

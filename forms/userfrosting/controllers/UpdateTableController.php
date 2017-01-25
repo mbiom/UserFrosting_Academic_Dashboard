@@ -51,7 +51,7 @@ class UpdateTableController extends \UserFrosting\BaseController {
         return json_encode($classRefs);
     }
     // update tracking table first
-    public function updateTrackingTable() {
+    public function updateFirstTrackingTable() {
         StudentsTracking::queryBuilder()
             ->delete();
             
@@ -94,11 +94,22 @@ class UpdateTableController extends \UserFrosting\BaseController {
         StudentsTracking::queryBuilder()
             ->insert($insertData);
             
-        var_dump($insertData);
+        // var_dump($insertData);
          
         return "";
     }
     
+    public function updateLaterTrackingTable() {
+    }
+
+    public function removeEditionTable()
+    {
+        $students = StudentsBio::queryBuilder()
+            ->where('term', '=', '20161')
+            ->delete();
+        return json_encode("Ok");
+    }
+
     public function updateTestFormTable() {
         //get trackings from tracking table
         $this->STUDENTS_TRACKING = array();
@@ -116,7 +127,8 @@ class UpdateTableController extends \UserFrosting\BaseController {
             ->get(array('term'));
         
         $this->updatePostTestFormTable($terms[0]['term']);
-        //$this->updateTrackingTable();
+        // $this->updateTrackingTable();
+            // return (json_encode($this->updatePostTestFormTable($terms[0]['term'])));
         return json_encode("Ok");
     }
     
@@ -199,11 +211,15 @@ class UpdateTableController extends \UserFrosting\BaseController {
                 $arr_test_results[$student_id]['flags'] = "Check testing";
             }
             else {
-                $trackingLevel = $this->STUDENTS_TRACKING[$student_id];
-                $arr_test_results[$student_id]['tracking'] = $trackingLevel;
-                $arr_test_results[$student_id]['NRS'] = $trackingLevel == 14 ?
-                    $this->getLevel($arr_test_results[$student_id]['preL'], false) :
-                    $this->getLevel($arr_test_results[$student_id]['preR'], true);
+                // $trackingLevel = $this->STUDENTS_TRACKING[$student_id];
+                // $trackingLevel = array_key_exists($student_id, $this->STUDENTS_TRACKING) ? $this->STUDENTS_TRACKING[$student_id] : 10;
+                $trackingLevel = [10,0];
+                if (!array_key_exists('postR', $arr_test_results[$student_id]) || !array_key_exists('postL', $arr_test_results[$student_id]))
+                    $trackingLevel = [10,0];
+                else
+                    $trackingLevel = $this->getTracking($arr_test_results[$student_id]['postR'], $arr_test_results[$student_id]['postL']);
+                $arr_test_results[$student_id]['tracking'] = $trackingLevel[0];
+                $arr_test_results[$student_id]['NRS'] = $trackingLevel[1];
             }
         }
         
@@ -279,9 +295,10 @@ class UpdateTableController extends \UserFrosting\BaseController {
             $arr_test_results[$student_id]['lastName'] = $student['last_name'];
             $arr_test_results[$student_id]['firstName'] = $student['first_name'];
             $arr_test_results[$student_id]['phone'] = $student['telephone'];
+            $arr_test_results[$student_id]['hours'] = $student['hours'];
         }
         
-        //format array result
+        //validate array result
         $check_fields = array('NRS', 'preR', 'postR', 'progR', 'preL', 'postL', 'progL', 'tracking', 'LCPEarned', 'LCP', 'LCPTotal', 'nextLevel', 'autoProm', 'adminProm', 'flags', 'comments');
         foreach ($arr_test_results as $key => $test_result) {
             foreach ($check_fields as $fieldname) {
@@ -298,6 +315,8 @@ class UpdateTableController extends \UserFrosting\BaseController {
             if ((string)$test_result['nextLevel'] != ''){
                 $arr_test_results[$key]['nextLevel'] = $this->LEVEL_RANGES[$test_result['nextLevel']][0];
             }
+            if ($test_result['tracking'] != 10 && $test_result['tracking'] != 14 )
+                $arr_test_results[$key]['tracking'] = 10;
         }
     
         $delete = PostTestForm::queryBuilder()
@@ -307,7 +326,7 @@ class UpdateTableController extends \UserFrosting\BaseController {
         $insertData = array();
         
         foreach ($arr_test_results as $key => $test_result) {
-            
+
             $row = array(
                 'term'  => $term,
                 'reference_number'  => $test_result['classRef'],
@@ -315,6 +334,7 @@ class UpdateTableController extends \UserFrosting\BaseController {
                 'first_name'  => $test_result['firstName'],
                 'student_id'  => $key,
                 'telephone'  => $test_result['phone'],
+                'hours' => $test_result['hours'],
                 'nrs_level'  => $test_result['NRS'],
                 'pre_reading'  => $test_result['preR'],
                 'post_reading'  => $test_result['postR'],
@@ -332,13 +352,17 @@ class UpdateTableController extends \UserFrosting\BaseController {
                 'flags'  => $test_result['flags'],
                 'comments'  => $test_result['comments']
                 );
+            
             array_push($insertData, $row);
         }
+        // return $insertData;
         PostTestForm::queryBuilder()
             ->insert($insertData);
     }
     
     public function getTracking($reading, $listening) {
+        if (!is_numeric($reading) || !is_numeric($listening))
+            return 10;
         $level_reading = $this->getLevel($reading, true);
         $level_listening = $this->getLevel($listening, false);
         $tracking = 10;

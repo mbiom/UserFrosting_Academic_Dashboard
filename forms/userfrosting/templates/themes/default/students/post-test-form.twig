@@ -48,7 +48,7 @@
     </div>
     
     <div class="table-responsive">
-        <table id="table-tests" class="tablesorter table table-bordered table-hover table-striped tablesorter-bootstrap" width='100%'>
+        <table id="table-tests" class="table table-bordered table-hover table-fixed" width='100%'>
             <thead>
                 <tr>
                     <th colspan=7>&nbsp</th>
@@ -63,6 +63,8 @@
                     <th data-column-name="column-3">Student<br> First Name </th>
                     <th data-column-name="column-4">ID Number </th>
                     <th data-column-name="column-5">Phone Number </th>
+                    <th data-column-name="column-13">Tracking </th>
+                    <th data-column-name="column-13">Hours </th>
                     <th data-column-name="column-6">NRS Level </th>
                     <th data-column-name="column-7">PRE </th>
                     <th data-column-name="column-8">POST </th>
@@ -70,7 +72,6 @@
                     <th data-column-name="column-10">PRE </th>
                     <th data-column-name="column-11">POST </th>
                     <th data-column-name="column-12">Listening<br> Progress </th>
-                    <th data-column-name="column-13">Tracking </th>
                     <th data-column-name="column-14">LCP Earned </th>
                     <th data-column-name="column-15">LCP </th>
                     <th data-column-name="column-16">LCP Total </th>
@@ -100,7 +101,7 @@
                 var button = $(this);
                 var term_Id = button.attr('id').substr(5,button.attr('id').length-5);
                     
-                $.ajax('/students/authorize-promotion/' + term_Id, {
+                $.ajax('/forms/public/students/authorize-promotion/' + term_Id, {
                     success: function(data) {
                         button.attr('class', 'btn-authorized');
                         button.html = "Authorized";
@@ -115,7 +116,7 @@
                 var term_Id = button.attr('id').substr(5,button.attr('id').length-5);
                 var comment = $('#cmmt_' + term_Id).val() + ' By ID ' + String.fromCharCode(35) + $('#user-name').html();
                     
-                $.ajax('/students/add-comment/' + term_Id + '_' + comment, {
+                $.ajax('/forms/public/students/add-comment/' + term_Id + '_' + comment, {
                     success: function(data) {
                         td.html(comment + "<br>" + td.html());
                     }
@@ -129,7 +130,7 @@
                 $this.css("background-color","green");
                 
                 var termId = $this.html();
-                $.ajax('/students/get-post-test-form/' + termId, {
+                $.ajax('/forms/public/students/get-post-test-form/' + termId, {
                     success: function(data) {
                         test_results = JSON.parse(data);
                         $('.class-btn').first().click();
@@ -164,6 +165,8 @@
                     tableHtml += '<td>' + capitalizeFirstLetter(test_results[key].first_name) + '</td>';
                     tableHtml += '<td>' + test_results[key].student_id + '</td>';
                     tableHtml += '<td>' + test_results[key].telephone + '</td>';
+                    tableHtml += '<td>' + fixZ(test_results[key].tracking) + '</td>';
+                    tableHtml += '<td>' + fixZ(test_results[key].hours) + '</td>';
                     tableHtml += '<td>' + test_results[key].nrs_level + '</td>';
                     tableHtml += '<td>' + fixZ(test_results[key].pre_reading) + '</td>';
                     tableHtml += '<td>' + fixZ(test_results[key].post_reading) + '</td>';
@@ -171,7 +174,6 @@
                     tableHtml += '<td>' + fixZ(test_results[key].pre_listening) + '</td>';
                     tableHtml += '<td>' + fixZ(test_results[key].post_listening) + '</td>';
                     tableHtml += '<td>' + test_results[key].prog_listening + '</td>';
-                    tableHtml += '<td>' + fixZ(test_results[key].tracking) + '</td>';
                     tableHtml += '<td>' + test_results[key].lcp_earned + '</td>';
                     tableHtml += '<td>' + test_results[key].lcp + '</td>';
                     tableHtml += '<td>' + test_results[key].lcp_total + '</td>';

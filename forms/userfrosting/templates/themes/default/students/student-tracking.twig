@@ -87,7 +87,7 @@
                 }
                 
                 $('#div-std-data').show();
-                $.ajax('/students/get-student-tracking/' + $('#txt-student').val(), {
+                $.ajax('/forms/public/students/get-student-tracking/' + $('#txt-student').val(), {
                     success: function(data) {
                         student_tracking_info = JSON.parse(data);
                         if (student_tracking_info === null || student_tracking_info.length == 0){

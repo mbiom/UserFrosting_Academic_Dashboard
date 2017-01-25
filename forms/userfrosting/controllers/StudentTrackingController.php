@@ -44,6 +44,13 @@ class StudentTrackingController extends \UserFrosting\BaseController {
     
     public function getStudentTracking($student_id) {
         
+        $terms = TestResults::queryBuilder()
+            ->where('term', '<>', '')
+            ->groupBy('term')
+            ->orderBy('term', 'desc')
+            ->get(array('term'));
+        $lastterm = $terms[0]['term'];
+        
         $student_tracking = array(); // returning value
         
         $test_results = TestResults::queryBuilder()
@@ -60,9 +67,8 @@ class StudentTrackingController extends \UserFrosting\BaseController {
         
         $trackings = PostTestForm::queryBuilder()
             ->where('student_id', $student_id)
-            ->where('term', '=', $this->LASTTERM)
+            ->where('term', '=', $lastterm)
             ->get();
-            
         if (count($trackings) != 0) {
             $student_tracking = $trackings[0];
         }

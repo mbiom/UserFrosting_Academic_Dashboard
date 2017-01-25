@@ -325,6 +325,11 @@
         $controller = new UF\UpdateTableController($app);
         echo $controller->updateTestFormTable();
     });
+
+    $app->get('/students/remove-edition-table/?', function() use ($app) {
+        $controller = new UF\UpdateTableController($app);
+        echo $controller->removeEditionTable();
+    });
     
     $app->get('/students/excessive-absences/?', function() use ($app) {
         $controller = new UF\ExcessiveAbsencesController($app);
