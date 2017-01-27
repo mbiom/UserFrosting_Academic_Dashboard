@@ -34,7 +34,7 @@ class NextAssignTestController extends \UserFrosting\BaseController {
     public function pageNextAssignTest(){
         // Access-controlled page
         $ClassReferences = StudentsBio::queryBuilder()
-            ->where('term', '=', $this->LASTTERM)
+            ->where('term', '=', $this->getLastTermName())
             ->groupBy('teacher_id')
             ->groupBy('reference_number')
             ->get(array('teacher_id', 'reference_number'));
@@ -49,7 +49,7 @@ class NextAssignTestController extends \UserFrosting\BaseController {
         
         $AllClasses = StudentsBio::queryBuilder()
             ->groupBy('reference_number')
-            ->where('term', '=', $this->LASTTERM)
+            ->where('term', '=', $this->getLastTermName())
             ->get(array('reference_number'));
         
         $Terms = StudentsBio::queryBuilder()
@@ -71,6 +71,7 @@ class NextAssignTestController extends \UserFrosting\BaseController {
         
         $students = NextAssignTest::queryBuilder()
             ->leftJoin('uf_students_bio as B', 'B.student_id', '=', 'uf_nat.student_id')
+            ->where('B.term', '=', $term)
             ->where('uf_nat.term', '=', $term)
             ->where('reference_number', '=', $classId)
             ->get();

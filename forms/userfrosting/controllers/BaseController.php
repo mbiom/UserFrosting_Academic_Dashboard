@@ -180,7 +180,15 @@ class BaseController {
 		return $year.$termofyear;
 	}
 	
-	
+	public function getLastTermName() {
+        $terms = TestResults::queryBuilder()
+            ->where('term', '<>', '')
+            ->groupBy('term')
+            ->orderBy('term', 'desc')
+            ->get(array('term'));
+        return $terms[0]['term'];
+    }
+    
     public $LEVEL_RANGES = array(
                                  array("FO", 153, 180, 169, 180, "A"),
                                  array("LB", 181, 190, 181, 189, "B"),

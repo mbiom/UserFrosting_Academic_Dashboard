@@ -84,7 +84,8 @@ class StudentPerformanceController extends \UserFrosting\BaseController {
             $listening_pfms = $this->getRLPerformanceOfStudent($student['student_id'], false, $term);
             if (count($reading_pfms) > 0) $std_pfm_data['R'] = $reading_pfms;
             if (count($listening_pfms) > 0) $std_pfm_data['L'] = $listening_pfms;
-            array_push($pfm_data, $std_pfm_data);
+            if (count($reading_pfms) > 0 || count($listening_pfms) > 0)
+                array_push($pfm_data, $std_pfm_data);
         }
         
         return json_encode($pfm_data);

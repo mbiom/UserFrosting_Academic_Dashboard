@@ -59,8 +59,10 @@ class PostTestFormController extends \UserFrosting\BaseController {
     
     public function getTestFormOfTerm($term) {
         $testResults = PostTestForm::queryBuilder()
-            ->where('term', '=', $term)
-            ->orderBy('last_name')
+            ->leftJoin('uf_students_bio as bio', 'uf_post_test_form.student_id', '=', 'bio.student_id')
+            ->where('bio.term', '=', $term)
+            ->where('uf_post_test_form.term', '=', $term)
+            ->orderBy('uf_post_test_form.last_name')
             ->get();
         return json_encode($testResults);
     }

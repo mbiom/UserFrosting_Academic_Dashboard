@@ -72,6 +72,7 @@ class PerformanceSummaryController extends \UserFrosting\BaseController {
 
         $forms = StudentPerformance::queryBuilder()
             ->leftJoin('uf_students_bio as bio', 'uf_student_performance.student_id', '=', 'bio.student_id')
+            ->where('bio.term', '=', $term)
             ->where('uf_student_performance.term', '=', $term)
             ->where('bio.reference_number', '=', $classId)
             ->groupBy('uf_student_performance.form')
@@ -98,6 +99,7 @@ class PerformanceSummaryController extends \UserFrosting\BaseController {
         // order by position, main_comp desc
         $pfms = StudentPerformance::queryBuilder()
             ->leftJoin('uf_students_bio as bio', 'uf_student_performance.student_id', '=', 'bio.student_id')
+            ->where('bio.term', '=', $term)
             ->where('uf_student_performance.term', '=', $term)
             ->where('bio.reference_number', '=', $classId)
             ->where('uf_student_performance.form', '=', $formId)
@@ -129,6 +131,7 @@ class PerformanceSummaryController extends \UserFrosting\BaseController {
 
         $pfms = StudentPerformance::queryBuilder()
             ->leftJoin('uf_students_bio as bio', 'uf_student_performance.student_id', '=', 'bio.student_id')
+            ->where('bio.term', '=', $term)
             ->where('uf_student_performance.term', '=', $term)
             ->where('bio.reference_number', '=', $classId)
             ->where('uf_student_performance.form', '=', $formId)
